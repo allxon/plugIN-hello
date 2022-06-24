@@ -1,0 +1,18 @@
+{
+    "jsonrpc": "2.0",
+    "method": "v2/notifyPluginCommandAck",
+    "params": {
+       "appGUID": "${PLUGIN_APP_GUID}",
+       "epoch": "",
+       "commandId": "",
+       "commandSource": "remote",
+       "moduleName": "${PLUGIN_NAME}",
+       "commandState": "",
+       "commandAcks": [
+          {
+             "name": "say_hello",
+             "result": {}
+          }
+       ]
+    }
+ }

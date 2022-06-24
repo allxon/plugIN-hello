@@ -1,0 +1,18 @@
+FROM --platform=linux/amd64 ubuntu:20.04 AS install-dependency
+RUN apt-get update && apt-get install -y \
+	wget \
+	g++ \
+	make \
+	libssl-dev \
+	&& rm -rf /var/lib/apt/lists/*
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.23.2/cmake-3.23.2-linux-x86_64.tar.gz
+RUN tar -xf cmake-3.23.2-linux-x86_64.tar.gz && cp -r cmake-3.23.2-linux-x86_64/* /usr
+
+FROM install-dependency AS build-stage
+COPY . /app
+WORKDIR /app
+RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=release -DPLUGIN_KEY=plugin_key.json
+RUN cmake --build build --target package
+
+FROM scratch AS output-stage
+COPY --from=build-stage /app/build/*.tar.gz / 
