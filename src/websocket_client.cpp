@@ -90,7 +90,7 @@ void WebSocketClient::OnMessage(websocketpp::connection_hdl hdl, client::message
     std::string get_method;
     if (!m_json_validator->Verify(payload, get_method))
     {
-        std::cout << "OnMessage payload verify failed" << std::endl;
+        std::cout << m_json_validator->error_message() << std::endl;
         exit(0);
     }
     if (get_method == "v2/notifyPluginCommand")
