@@ -12,11 +12,11 @@ Get your platform archive from [release page](https://github.com/allxon/plugIN-h
 ## Extract and Run
 After downloaded archive, extract your archive and run it
 ```bash
-[EXTRACT_FOLDER_PATH]/plugIN-hello [EXTRACT_FOLDER_PATH]
+[EXTRACT_FOLDER_PATH]/plugin-hello [EXTRACT_FOLDER_PATH]
 ```
 or Windows cmd.
 ```batch
-[EXTRACT_FOLDER_PATH]\plugIN-hello.exe [EXTRACT_FOLDER_PATH]
+[EXTRACT_FOLDER_PATH]\plugin-hello.exe [EXTRACT_FOLDER_PATH]
 ```
 
 # Build From Source
@@ -69,15 +69,15 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=<Debug|Release> -DPLUGIN_KEY=plugin_key.j
 cmake --build build
 
 # Run after build
-# You can run plugIN-hello directly under build/ folder, and pass resource_dir_linux through argument
-build/plugIN-hello resource_dir_linux
+# You can run plugin-hello directly under build/ folder, and pass resource_dir_linux through argument
+build/plugin-hello resource_dir_linux
 
 # Install Stage
 cmake --install build --prefix /opt/allxon/plugIN
 
 # Run after Install
 # and pass resource_dir_linux or installed directory through argument
-/opt/allxon/plugIN/[APP_GUID]/plugIN-hello /opt/allxon/plugIN/[APP_GUID]
+/opt/allxon/plugIN/[APP_GUID]/plugin-hello /opt/allxon/plugIN/[APP_GUID]
 ```
 
 ### Windows
@@ -89,21 +89,21 @@ cmake -G "Visual Studio 16 2019" -A Win32 -S . -B "build" -DPLUGIN_KEY=plugin_ke
 cmake --build build --config <Debug|Release>
 
 @REM Run after build
-@REM You can run plugIN-hello directly under build\ folder, and pass resource_dir_windows through argument
-build\<Debug|Release>\plugIN-hello.exe resource_dir_windows
+@REM You can run plugin-hello directly under build\ folder, and pass resource_dir_windows through argument
+build\<Debug|Release>\plugin-hello.exe resource_dir_windows
 
 @REM Install Stage
 cmake --install build --prefix C:\ProgramData\allxon\plugIN
 
 @REM Run after Install
 @REM and pass resource_dir_windows or installed directory through argument
-C:\ProgramData\allxon\plugIN\[APP_GUID]\plugIN-hello.exe C:\ProgramData\allxon\plugIN\[APP_GUID]
+C:\ProgramData\allxon\plugIN\[APP_GUID]\plugin-hello.exe C:\ProgramData\allxon\plugIN\[APP_GUID]
 ```
 
 # How to Deploy & Install
 _plugIN package_ is a archive repesent a plugIN in Allxon plugIN ecosystem.
 
-A plugIN package filename is named to `plugIN-hello-[version]-linux-[arch].tar.gz` (linux) or `plugIN-hello-[version]-win-[arch].zip` (windows). 
+A plugIN package filename is named to `plugin-hello-[version]-linux-[arch].tar.gz` (linux) or `plugin-hello-[version]-win-[arch].zip` (windows). 
 
 ## Deploy plugIN packge 
 

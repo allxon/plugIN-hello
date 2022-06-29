@@ -1,0 +1,17 @@
+{
+    "jsonrpc": "2.0",
+    "method": "v2/notifyPluginAlert",
+    "params": {
+       "appGUID": "${PLUGIN_APP_GUID}",
+       "moduleName": "${PLUGIN_NAME}",
+       "epoch": "",
+       "alarms": [
+          {
+             "name": "hello_alarm",
+             "action": "trigger",
+             "time": "",
+             "message": ""
+          }
+       ]
+    }
+ }

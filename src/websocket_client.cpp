@@ -1,7 +1,8 @@
 #include "websocket_client.h"
+#include "build_info.h"
 
-WebSocketClient::WebSocketClient(std::shared_ptr<Allxon::JsonValidator> json_validator, const std::string &url) 
-: m_json_validator(json_validator), m_url(url), received_person_("nobody")
+WebSocketClient::WebSocketClient(std::shared_ptr<Allxon::JsonValidator> json_validator, const std::string &url)
+    : m_json_validator(json_validator), m_url(url), received_person_("nobody"), alert_enabled_(false), alert_trigger_(false)
 {
     m_endpoint.set_reuse_addr(true);
     m_endpoint.clear_access_channels(websocketpp::log::alevel::all);
@@ -47,6 +48,11 @@ void WebSocketClient::RunSendingLoop()
         {
             SendPluginStatesMetrics();
             count = 0;
+        }
+        if (alert_trigger()) {
+            if (is_alert_enabled())
+                SendPluginAlert();
+            set_alert_trigger(false);
         }
     }
 }
@@ -95,6 +101,7 @@ void WebSocketClient::OnMessage(websocketpp::connection_hdl hdl, client::message
     }
     if (get_method == "v2/notifyPluginCommand")
     {
+        std::cout << "Get Method:" << get_method << std::endl;
         auto cmd_cjson = cJSON_Parse(payload.c_str());
         auto params_cjson = cJSON_GetObjectItemCaseSensitive(cmd_cjson, "params");
         auto command_id_cjson = cJSON_GetObjectItemCaseSensitive(params_cjson, "commandId");
@@ -105,7 +112,7 @@ void WebSocketClient::OnMessage(websocketpp::connection_hdl hdl, client::message
         auto cmd_params_cjson = cJSON_GetObjectItemCaseSensitive(command_cjson, "params");
         auto cmd_param_cjson = cJSON_GetArrayItem(cmd_params_cjson, 0);
         auto cmd_value_cjson = cJSON_GetObjectItemCaseSensitive(cmd_param_cjson, "value");
-        received_person_ = std::string(cJSON_GetStringValue(cmd_value_cjson));
+        set_received_person(cJSON_GetStringValue(cmd_value_cjson));
 
         auto cmd_accept = Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_command_ack.json");
         auto cmd_accept_cjson = cJSON_Parse(cmd_accept.c_str());
@@ -117,7 +124,7 @@ void WebSocketClient::OnMessage(websocketpp::connection_hdl hdl, client::message
         auto accept_command_acks_cjson = cJSON_GetObjectItemCaseSensitive(accept_params_cjson, "commandAcks");
         auto accept_command_ack_cjson = cJSON_GetArrayItem(accept_command_acks_cjson, 0);
         auto accept_result_cjson = cJSON_GetObjectItemCaseSensitive(accept_command_ack_cjson, "result");
-        cJSON_AddStringToObject(accept_result_cjson, "response", std::string("Hello " + received_person_).c_str());
+        cJSON_AddStringToObject(accept_result_cjson, "response", std::string("Hello " + received_person()).c_str());
         char *cmd_accept_str = cJSON_Print(cmd_accept_cjson);
         PushCommandQueue(m_cmd_accept_queue, std::string(cmd_accept_str));
         delete cmd_accept_str;
@@ -129,6 +136,29 @@ void WebSocketClient::OnMessage(websocketpp::connection_hdl hdl, client::message
 
         cJSON_Delete(cmd_cjson);
         cJSON_Delete(cmd_accept_cjson);
+
+        set_alert_trigger(true);
+    }
+    else if (get_method == "v2/notifyPluginAlarmUpdate")
+    {
+        std::cout << "Get Method:" << get_method << std::endl;
+        auto np_alarm_cjson = cJSON_Parse(payload.c_str());
+        auto params_cjson = cJSON_GetObjectItemCaseSensitive(np_alarm_cjson, "params");
+        auto version_cjson = cJSON_GetObjectItemCaseSensitive(params_cjson, "version");
+        std::string version_from_portal = cJSON_GetStringValue(version_cjson);
+        if (version_from_portal != PLUGIN_VERSION)
+        {
+            std::cerr << "Error: version is not same with portal, plugIN: " << PLUGIN_VERSION << ", Portal: " << version_from_portal;
+            cJSON_Delete(np_alarm_cjson);
+            return;
+        }
+        auto modules_cjson = cJSON_GetObjectItemCaseSensitive(params_cjson, "modules");
+        auto module_cjson = cJSON_GetArrayItem(modules_cjson, 0);
+        auto alarms_cjson = cJSON_GetObjectItemCaseSensitive(module_cjson, "alarms");
+        auto alarm_cjson = cJSON_GetArrayItem(alarms_cjson, 0);
+        auto enabled_cjson = cJSON_GetObjectItemCaseSensitive(alarm_cjson, "enabled");
+        set_alert_enabled(cJSON_IsTrue(enabled_cjson));
+        cJSON_Delete(np_alarm_cjson);
     }
 }
 void WebSocketClient::SendNotifyPluginUpdate()
@@ -165,7 +195,7 @@ void WebSocketClient::SendPluginStatesMetrics()
     auto states_cjson = cJSON_GetObjectItemCaseSensitive(params_cjson, "states");
     auto state_cjson = cJSON_GetArrayItem(states_cjson, 0);
     auto state_value_cjson = cJSON_GetObjectItemCaseSensitive(state_cjson, "value");
-    cJSON_SetValuestring(state_value_cjson, std::string("Hello " + received_person_ + " ~").c_str());
+    cJSON_SetValuestring(state_value_cjson, std::string("Hello " + received_person() + " ~").c_str());
     auto output_char = cJSON_Print(np_state_cjson);
     std::string output_string(output_char);
     delete output_char;
@@ -198,6 +228,33 @@ void WebSocketClient::SendPluginCommandAck(std::queue<std::string> &queue)
     }
 }
 
+void WebSocketClient::SendPluginAlert()
+{
+    std::cout << "SendPluginAlert" << std::endl;
+    std::string notify_plugin_alert = Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_alert.json");
+    auto np_alert_cjson = cJSON_Parse(notify_plugin_alert.c_str());
+    auto params_cjson = cJSON_GetObjectItemCaseSensitive(np_alert_cjson, "params");
+    auto alarms_cjson = cJSON_GetObjectItemCaseSensitive(params_cjson, "alarms");
+    auto alarm_cjson = cJSON_GetArrayItem(alarms_cjson, 0);
+    auto alarm_msg_cjson = cJSON_GetObjectItemCaseSensitive(alarm_cjson, "message");
+    cJSON_SetValuestring(alarm_msg_cjson, std::string("Hello " + received_person() + " ~").c_str());
+    auto alarm_time_cjson = cJSON_GetObjectItemCaseSensitive(alarm_cjson, "time");
+    cJSON_SetValuestring(alarm_time_cjson, std::to_string(time(NULL)).c_str());
+    auto output_char = cJSON_Print(np_alert_cjson);
+    std::string output_string(output_char);
+    delete output_char;
+    cJSON_Delete(np_alert_cjson);
+    if (!m_json_validator->Sign(output_string))
+    {
+        std::cout << m_json_validator->error_message().c_str() << std::endl;
+        set_alert_trigger(false);
+        return;
+    }
+
+    m_endpoint.send(m_hdl, output_string.c_str(), websocketpp::frame::opcode::TEXT);
+    std::cout << "Send:" << output_string << std::endl;
+}
+
 void WebSocketClient::PushCommandQueue(std::queue<std::string> &queue, std::string data)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -212,4 +269,40 @@ bool WebSocketClient::PopCommandQueue(std::queue<std::string> &queue, std::strin
     pop_data = queue.front();
     queue.pop();
     return true;
+}
+
+void WebSocketClient::set_alert_enabled(bool enabled)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    alert_enabled_ = enabled;
+}
+
+bool WebSocketClient::is_alert_enabled() const
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return alert_enabled_;
+}
+
+void WebSocketClient::set_received_person(const std::string &person)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    received_person_ = person;
+}
+
+std::string WebSocketClient::received_person() const
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return received_person_;
+}
+
+void WebSocketClient::set_alert_trigger(bool need_trigger)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    alert_trigger_ = need_trigger;
+}
+
+bool WebSocketClient::alert_trigger() const
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return alert_trigger_;
 }

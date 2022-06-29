@@ -2,7 +2,7 @@
 CURRENT_SH_DIRECTORY=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 exec &> "${CURRENT_SH_DIRECTORY}/$(basename "${BASH_SOURCE[0]%.*}").output"
 
-PLUGIN_NAME=plugIN-hello
+PLUGIN_NAME=plugin-hello
 PLUGIN_SERVICE=${PLUGIN_NAME}.service
 PLUGIN_APP_GUID=${ALLXON_PLUGIN_DIR##*/}
 
