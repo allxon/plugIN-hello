@@ -56,12 +56,22 @@ private:
     void SendNotifyPluginUpdate();
     void SendPluginStatesMetrics();
     void SendPluginCommandAck(std::queue<std::string> &queue);
+    void SendPluginAlert();
     void PushCommandQueue(std::queue<std::string> &queue, std::string data);
     bool PopCommandQueue(std::queue<std::string> &queue, std::string &pop_data);
 
+    void set_alert_enabled(bool enabled);
+    bool is_alert_enabled() const;
+
+    void set_received_person(const std::string &person);
+    std::string received_person() const;
+
+    void set_alert_trigger(bool need_trigger);
+    bool alert_trigger() const;
+
     client m_endpoint;
     websocketpp::connection_hdl m_hdl;
-    std::mutex m_mutex;
+    mutable std::mutex m_mutex;
     websocketpp::lib::shared_ptr<std::thread> m_run_thread;
     websocketpp::lib::shared_ptr<std::thread> m_send_thread;
     std::shared_ptr<Allxon::JsonValidator> m_json_validator;
@@ -69,5 +79,7 @@ private:
     std::queue<std::string> m_cmd_ack_queue;
     std::string m_url;
     std::string received_person_;
+    bool alert_enabled_;
+    bool alert_trigger_;
 };
 #endif

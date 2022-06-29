@@ -6,13 +6,13 @@
     "appGUID": "${PLUGIN_APP_GUID}",
     "appName": "${PLUGIN_NAME}",
     "epoch": "",
-    "displayName": "${PLUGIN_NAME}",
+    "displayName": "plugIN Hello",
     "type": "ib",
     "version": "${PLUGIN_VERSION}",
     "modules": [
       {
         "moduleName": "${PLUGIN_NAME}",
-        "displayName": "${PLUGIN_NAME}",
+        "displayName": "plugIN Hello",
         "properties": [
           {
             "name": "current_dir",
@@ -51,7 +51,15 @@
         ],
         "metrics": null,
         "events": null,
-        "alarms": null,
+        "alarms": [
+          {
+            "name": "hello_alarm",
+            "displayCategory": "Message",
+            "displayName": "Hello alarm",
+            "description": "Trigger when someone say hello",
+            "params": []
+          }
+        ],
         "configs": null
       }
     ]

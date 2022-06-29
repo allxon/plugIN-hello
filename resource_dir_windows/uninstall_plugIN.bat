@@ -11,7 +11,7 @@ ECHO objShell.ShellExecute "cmd", "/c " ^& strCommandLine, "", "runas" 1>>temp.v
 cscript //nologo temp.vbs & del temp.vbs & exit /b
 :admin
 
-SET APP_NAME=plugIN-hello
+SET APP_NAME=plugin-hello
 SET CURRENT_DIR=%~dp0
 
 @REM Main 

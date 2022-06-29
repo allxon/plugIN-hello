@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
-project(plugIN-hello VERSION 1.0.0)
+project(plugin-hello VERSION 1.0.0)
 set(PLUGIN_SDK_VERSION 2.0.0)
 
 # specify the C++ standard
@@ -84,7 +84,7 @@ if (BUILD_FROM_SDK_SRC)
     FetchContent_Declare(
         plugIN_SDK
         GIT_REPOSITORY git@gitlab.com:allxon.com/plugin/plugin-sdk.git
-        GIT_TAG        ${PLUGIN_SDK_VERSION}
+        GIT_TAG        master
     )
     FetchContent_MakeAvailable(plugIN_SDK)
     set(PLUGIN_SDK_TARGET plugIN_SDK)
@@ -165,10 +165,10 @@ endif()
 # package stage
 if(WIN32)
     set(CPACK_GENERATOR "ZIP")
-    set(CPACK_PACKAGE_FILE_NAME "plugIN-hello-${PLUGIN_SDK_VERSION}-win-${CMAKE_GENERATOR_PLATFORM}")
+    set(CPACK_PACKAGE_FILE_NAME "plugin-hello-${PLUGIN_VERSION}-win-${CMAKE_GENERATOR_PLATFORM}")
 elseif(UNIX AND NOT APPLE)
     set(CPACK_GENERATOR "TGZ")
-    set(CPACK_PACKAGE_FILE_NAME "plugIN-hello-${PLUGIN_SDK_VERSION}-linux-${CMAKE_HOST_SYSTEM_PROCESSOR}")
+    set(CPACK_PACKAGE_FILE_NAME "plugin-hello-${PLUGIN_VERSION}-linux-${CMAKE_HOST_SYSTEM_PROCESSOR}")
 endif()
 
 set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY OFF)
