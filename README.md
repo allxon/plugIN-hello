@@ -12,11 +12,13 @@ Get your platform archive from [release page](https://github.com/allxon/plugIN-h
 ## Extract and Run
 After downloaded archive, extract your archive and run it
 ```bash
-[EXTRACT_FOLDER_PATH]/plugin-hello [EXTRACT_FOLDER_PATH]
+cd [EXTRACT_FOLDER_PATH]/[APP_GUID]
+./plugin-hello $(pwd)
 ```
 or Windows cmd.
 ```batch
-[EXTRACT_FOLDER_PATH]\plugin-hello.exe [EXTRACT_FOLDER_PATH]
+cd [EXTRACT_FOLDER_PATH]\[APP_GUID]
+plugin-hello.exe %cd%
 ```
 
 # Build From Source
