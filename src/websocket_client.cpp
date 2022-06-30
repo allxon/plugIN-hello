@@ -144,15 +144,13 @@ void WebSocketClient::OnMessage(websocketpp::connection_hdl hdl, client::message
         std::cout << "Get Method:" << get_method << std::endl;
         auto np_alarm_cjson = cJSON_Parse(payload.c_str());
         auto params_cjson = cJSON_GetObjectItemCaseSensitive(np_alarm_cjson, "params");
-        auto version_cjson = cJSON_GetObjectItemCaseSensitive(params_cjson, "version");
-        std::string version_from_portal = cJSON_GetStringValue(version_cjson);
-        if (version_from_portal != PLUGIN_VERSION)
+        auto modules_cjson = cJSON_GetObjectItemCaseSensitive(params_cjson, "modules");
+        if (cJSON_GetArraySize(modules_cjson) == 0)
         {
-            std::cerr << "Error: version is not same with portal, plugIN: " << PLUGIN_VERSION << ", Portal: " << version_from_portal;
+            set_alert_enabled(false);
             cJSON_Delete(np_alarm_cjson);
             return;
         }
-        auto modules_cjson = cJSON_GetObjectItemCaseSensitive(params_cjson, "modules");
         auto module_cjson = cJSON_GetArrayItem(modules_cjson, 0);
         auto alarms_cjson = cJSON_GetObjectItemCaseSensitive(module_cjson, "alarms");
         auto alarm_cjson = cJSON_GetArrayItem(alarms_cjson, 0);
