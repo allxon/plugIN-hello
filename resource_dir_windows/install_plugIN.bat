@@ -1,25 +1,25 @@
 @echo off
 
-@whoami /groups | find "S-1-16-12288" > nul && goto :admin
-@REM Create vbs to invoke UAC
-SET "ELEVATE_CMDLINE=cd /d "%~dp0" & call "%~f0" %*"
-ECHO Set objShell = CreateObject("Shell.Application") 1>temp.vbs
-ECHO Set objWshShell = WScript.CreateObject("WScript.Shell") 1>>temp.vbs
-ECHO Set objWshProcessEnv = objWshShell.Environment("PROCESS") 1>>temp.vbs
-ECHO strCommandLine = Trim(objWshProcessEnv("ELEVATE_CMDLINE")) 1>>temp.vbs
-ECHO objShell.ShellExecute "cmd", "/c " ^& strCommandLine, "", "runas" 1>>temp.vbs
-cscript //nologo temp.vbs & del temp.vbs & exit /b
-:admin
+@REM @whoami /groups | find "S-1-16-12288" > nul && goto :admin
+@REM @REM Create vbs to invoke UAC
+@REM SET "ELEVATE_CMDLINE=cd /d "%~dp0" & call "%~f0" %*"
+@REM ECHO Set objShell = CreateObject("Shell.Application") 1>temp.vbs
+@REM ECHO Set objWshShell = WScript.CreateObject("WScript.Shell") 1>>temp.vbs
+@REM ECHO Set objWshProcessEnv = objWshShell.Environment("PROCESS") 1>>temp.vbs
+@REM ECHO strCommandLine = Trim(objWshProcessEnv("ELEVATE_CMDLINE")) 1>>temp.vbs
+@REM ECHO objShell.ShellExecute "cmd", "/c " ^& strCommandLine, "", "runas" 1>>temp.vbs
+@REM cscript //nologo temp.vbs & del temp.vbs & exit /b
+@REM :admin
 
 SET APP_NAME=plugin-hello
-SET APP_GUID=%ALLXON_PLUGIN_DIR:"%programdata%\allxon\plugIN\"=%
+SET APP_GUID=%ALLXON_PLUGIN_DIR:C:\ProgramData\allxon\plugIN\=%
 SET CURRENT_DIR=%~dp0
 
 @REM Main 
 :main
 IF EXIST "%ALLXON_PLUGIN_DIR%" echo plugIN %ALLXON_PLUGIN_DIR% already installed & exit /b 0
 
-xcopy "%CURRENT_DIR%" "%ALLXON_PLUGIN_DIR%" /E /F /Y /I
+xcopy "%CURRENT_DIR%\%APP_GUID%" "%ALLXON_PLUGIN_DIR%" /E /F /Y /I
 
 echo ^<?xml version="1.0" encoding="UTF-16"?^>^
  ^<Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task"^>^
