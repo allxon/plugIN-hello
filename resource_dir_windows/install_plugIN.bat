@@ -12,6 +12,7 @@ cscript //nologo temp.vbs & del temp.vbs & exit /b
 :admin
 
 SET APP_NAME=plugin-hello
+SET APP_GUID=%ALLXON_PLUGIN_DIR:"%programdata%\allxon\plugIN\"=%
 SET CURRENT_DIR=%~dp0
 
 @REM Main 
