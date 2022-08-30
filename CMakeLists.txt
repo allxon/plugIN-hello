@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
-project(plugin-hello VERSION 1.0.0)
+project(plugin-hello VERSION 1.1.0)
 set(PLUGIN_SDK_VERSION 2.0.0)
 
 # specify the C++ standard
