@@ -49,8 +49,8 @@
             ]
           }
         ],
-        "metrics": null,
-        "events": null,
+        "metrics": [],
+        "events": [],
         "alarms": [
           {
             "name": "hello_alarm",
@@ -60,7 +60,7 @@
             "params": []
           }
         ],
-        "configs": null
+        "configs": []
       }
     ]
   }
