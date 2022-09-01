@@ -33,7 +33,7 @@ _plugIN key_ repesent your plugIN identity, get your plugIN Key `plugin_key.json
 
 ## Docker build
 ```bash
-sudo docker build -f <Dockerfile.x86_64|Dockerfile.aarch64> .
+sudo docker build -f <Dockerfile.x86_64|Dockerfile.jetson> .
 ```
 
 ## Install CMake
@@ -112,7 +112,7 @@ A plugIN package filename is named to `plugin-hello-[version]-linux-[arch].tar.g
 ### Linux
 ```bash
 # Deploy through docker, then you can get your plugIN package under OUTPUT_DIRECTORY 
-sudo docker build -f <Dockerfile.aarch64|Dockerfile.x86_64> -o [OUTPUT_DIRECTORY] .
+sudo docker build -f <Dockerfile.jetson|Dockerfile.x86_64> -o [OUTPUT_DIRECTORY] .
 ```
 ```bash
 # Deploy through cmake, then you can get your plugIN package under build directory
