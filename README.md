@@ -29,7 +29,7 @@ git clone --recurse-submodules https://github.com/allxon/plugIN-hello.git
 
 ## Get plugIN Key
 _plugIN key_ repesent your plugIN identity, get your plugIN Key `plugin_key.json` from Allxon and Download in working directory, you should have `APP_GUID`, `ACCESS_KEY` in your `plugin_key.json`
-> **WARNING**: Each `plugin_key.json` bind one plugIN program, if your plugIN deploy on windows, ubuntu and jetson, means your need three different `plugin_key.json` 
+> **WARNING**: Each `plugin_key.json` bind one plugIN program, if your plugIN deploy different platform or different cpu architecture, means your need different `plugin_key.json` 
 
 ## Docker build
 ```bash

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
-project(plugin-hello VERSION 1.1.0)
-set(PLUGIN_SDK_VERSION 2.0.1)
+project(plugin-hello VERSION 1.0.1)
+set(PLUGIN_SDK_VERSION 2.0.2)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -20,25 +20,32 @@ string(JSON PLUGIN_APP_GUID GET ${PLUGIN_KEY_CONTENT} app_guid)
 string(JSON PLUGIN_ACCESS_KEY GET ${PLUGIN_KEY_CONTENT} access_key)
 string(JSON PLUGIN_PLATFORM GET ${PLUGIN_KEY_CONTENT} platform)
 string(JSON PLUGIN_ARCH GET ${PLUGIN_KEY_CONTENT} architecture)
-if(WIN32)
+
+# Check avaliable plugin_sdk
+if(WIN32 AND MSVC)
     if(NOT "${PLUGIN_PLATFORM}" STREQUAL "windows")
         message(FATAL_ERROR "plugin_key platform is not matched current platform")
+    endif()
+    if ((NOT "${CMAKE_GENERATOR_PLATFORM}" STREQUAL "Win32") AND (NOT "${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")) 
+            message(FATAL_ERROR "unsupport architecture on ${CMAKE_GENERATOR_PLATFORM}, please build from source")
+    endif()
+    if(("${PLUGIN_ARCH}" STREQUAL "x86_64") AND (NOT "${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64"))
+            message(FATAL_ERROR "plugin_key architecture is not matched current build")
+    endif()
+    if(("${PLUGIN_ARCH}" STREQUAL "x86") AND (NOT "${CMAKE_GENERATOR_PLATFORM}" STREQUAL "Win32"))
+            message(FATAL_ERROR "plugin_key architecture is not matched current build")
     endif()
 elseif(UNIX)
     if(NOT "${PLUGIN_PLATFORM}" STREQUAL "linux")
         message(FATAL_ERROR "plugin_key platform is not matched current platform")
     endif()
+    if (NOT "${CMAKE_HOST_SYSTEM_PROCESSOR}" STREQUAL "${PLUGIN_ARCH}")
+        message(FATAL_ERROR "unsupport architecture on ${CMAKE_HOST_SYSTEM_PROCESSOR}, please build from source")
+    endif()
+else()
+    message(FATAL_ERROR "current os is not support")
 endif()
 
-# Check avaliable plugin_sdk binary arch
-if("${PLUGIN_ARCH}" STREQUAL "aarch64|jetson") 
-    set(PLUGIN_ARCH "aarch64")
-elseif("${PLUGIN_ARCH}" STREQUAL "x86")
-    set(PLUGIN_ARCH "AMD64")
-endif()
-if (NOT "${CMAKE_HOST_SYSTEM_PROCESSOR}" STREQUAL "${PLUGIN_ARCH}")
-    message(FATAL_ERROR "unsupport architecture on ${CMAKE_HOST_SYSTEM_PROCESSOR}, please build from source")
-endif()
 
 # Check plugin package materials
 if(WIN32)
@@ -92,7 +99,7 @@ else()
     if (WIN32)
         set(URL_OS win)
         set(URL_SUFFIX zip)
-        set(URL_ARCH ${CMAKE_GENERATOR_PLATFORM})
+        set(URL_ARCH ${PLUGIN_ARCH})
     elseif (UNIX AND NOT APPLE)
         set(URL_OS linux)
         set(URL_SUFFIX tar.gz)
@@ -120,16 +127,23 @@ add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILE} ${PROJECT_SOURCE_DIR}/dep/cJ
 if(WIN32 AND MSVC)
     add_definitions (-D_WEBSOCKETPP_CPP11_STL_)
     set(OPENSSL_DIR ${PROJECT_SOURCE_DIR}/dep/openssl)
+    if("${PLUGIN_ARCH}" STREQUAL "x86")
+        set(OPENSSL_ARCH x86)
+    else()
+        set(OPENSSL_ARCH x64)
+        set(OPENSSL_DLL_SUFFIX -x64)
+    endif()
     list(APPEND LINK_LIBS ${PLUGIN_SDK_TARGET}
-            ${PROJECT_SOURCE_DIR}/dep/openssl/win_x86/lib/libcrypto.lib
-            ${PROJECT_SOURCE_DIR}/dep/openssl/win_x86/lib/libssl.lib)
+            ${PROJECT_SOURCE_DIR}/dep/openssl/win_${OPENSSL_ARCH}/lib/libcrypto.lib
+            ${PROJECT_SOURCE_DIR}/dep/openssl/win_${OPENSSL_ARCH}/lib/libssl.lib)
     list(APPEND EXTRA_INCLUDES ${PROJECT_SOURCE_DIR}/dep/openssl/include)
 
+    set(OPENSSL_DLL_PATH ${PROJECT_SOURCE_DIR}/dep/openssl/win_${OPENSSL_ARCH}/bin/)
     add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/dep/openssl/win_x86/bin/libssl-1_1.dll ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/
+        COMMAND ${CMAKE_COMMAND} -E copy ${OPENSSL_DLL_PATH}libssl-1_1${OPENSSL_DLL_SUFFIX}.dll ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/
     )
     add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/dep/openssl/win_x86/bin/libcrypto-1_1.dll ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/ 
+        COMMAND ${CMAKE_COMMAND} -E copy ${OPENSSL_DLL_PATH}libcrypto-1_1${OPENSSL_DLL_SUFFIX}.dll ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/ 
     )
 elseif(UNIX AND NOT APPLE)
     list(APPEND LINK_LIBS ${PLUGIN_SDK_TARGET} -pthread -lcrypto -lssl)
@@ -153,8 +167,8 @@ install(DIRECTORY ${PLUGIN_MATERIAL_DIR}/ DESTINATION ./${PLUGIN_APP_GUID}
 install(PROGRAMS ${PLUGIN_MATERIAL_INSTALL_SH} DESTINATION .)
 if(WIN32 AND MSVC)
     install(PROGRAMS ${PROJECT_BINARY_DIR}/$<CONFIG>/${CMAKE_PROJECT_NAME}.exe
-                     ${PROJECT_BINARY_DIR}/$<CONFIG>/libcrypto-1_1.dll
-                     ${PROJECT_BINARY_DIR}/$<CONFIG>/libssl-1_1.dll
+                     ${PROJECT_BINARY_DIR}/$<CONFIG>/libcrypto-1_1${OPENSSL_DLL_SUFFIX}.dll
+                     ${PROJECT_BINARY_DIR}/$<CONFIG>/libssl-1_1${OPENSSL_DLL_SUFFIX}.dll
             DESTINATION ./${PLUGIN_APP_GUID})
 else()
     install(PROGRAMS ${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME} DESTINATION ./${PLUGIN_APP_GUID})
@@ -163,7 +177,7 @@ endif()
 # package stage
 if(WIN32)
     set(CPACK_GENERATOR "ZIP")
-    set(CPACK_PACKAGE_FILE_NAME "plugin-hello-${PLUGIN_VERSION}-win-${CMAKE_GENERATOR_PLATFORM}")
+    set(CPACK_PACKAGE_FILE_NAME "plugin-hello-${PLUGIN_VERSION}-win-${PLUGIN_ARCH}")
 elseif(UNIX AND NOT APPLE)
     set(CPACK_GENERATOR "TGZ")
     set(CPACK_PACKAGE_FILE_NAME "plugin-hello-${PLUGIN_VERSION}-linux-${CMAKE_HOST_SYSTEM_PROCESSOR}")
