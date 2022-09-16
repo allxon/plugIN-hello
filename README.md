@@ -40,10 +40,10 @@ sudo docker build -f <Dockerfile.x86_64|Dockerfile.jetson> .
 - CMake 3.23 - [install link](https://cmake.org/download/)
 
 ## Dependency
-- [Allxon plugIN SDK](https://github.com/allxon/plugIN-sdk-v2)
+- [Allxon Octo SDK](https://github.com/allxon/octo-sdk)
 - OpenSSL
 
-It will auto fetch _plugIN SDK_ library when you configure cmake.
+It will auto fetch _Octo SDK_ library when you configure cmake.
 
 ### Linux Debian
 Install OpenSSL in Linux Debian.

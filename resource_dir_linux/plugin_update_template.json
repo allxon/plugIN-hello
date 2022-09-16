@@ -2,7 +2,7 @@
   "jsonrpc": "2.0",
   "method": "v2/notifyPluginUpdate",
   "params": {
-    "sdk": "${PLUGIN_SDK_VERSION}",
+    "sdk": "${OCTO_SDK_VERSION}",
     "appGUID": "${PLUGIN_APP_GUID}",
     "appName": "${PLUGIN_NAME}",
     "epoch": "",

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
 project(plugin-hello VERSION 1.0.1)
-set(PLUGIN_SDK_VERSION 2.0.2)
+set(OCTO_SDK_VERSION 3.0.0)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -21,7 +21,7 @@ string(JSON PLUGIN_ACCESS_KEY GET ${PLUGIN_KEY_CONTENT} access_key)
 string(JSON PLUGIN_PLATFORM GET ${PLUGIN_KEY_CONTENT} platform)
 string(JSON PLUGIN_ARCH GET ${PLUGIN_KEY_CONTENT} architecture)
 
-# Check avaliable plugin_sdk
+# Check avaliable octo_sdk
 if(WIN32 AND MSVC)
     if(NOT "${PLUGIN_PLATFORM}" STREQUAL "windows")
         message(FATAL_ERROR "plugin_key platform is not matched current platform")
@@ -77,7 +77,7 @@ endif()
 message("=================== CMAKE_DIR : ${CMAKE_SOURCE_DIR} ======================")
 message("PLUGIN_NAME: ${PLUGIN_NAME}")
 message("PLUGIN_VERSION: ${PLUGIN_VERSION}")
-message("PLUGIN_SDK_VERSION: ${PLUGIN_SDK_VERSION}")
+message("OCTO_SDK_VERSION: ${OCTO_SDK_VERSION}")
 message("CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 message("*** PROJECT_DIR : ${PROJECT_SOURCE_DIR} ")
 message("PLUGIN_PLATFORM: ${PLUGIN_PLATFORM}")
@@ -89,12 +89,12 @@ message("BUILD_FROM_SDK_SRC: ${BUILD_FROM_SDK_SRC}")
 include(FetchContent)
 if (BUILD_FROM_SDK_SRC)
     FetchContent_Declare(
-        plugIN_SDK
-        GIT_REPOSITORY git@gitlab.com:allxon.com/plugin/plugin-sdk.git
+        octo_sdk
+        GIT_REPOSITORY git@gitlab.com:allxon.com/plugin/octo-sdk.git
         GIT_TAG        master
     )
-    FetchContent_MakeAvailable(plugIN_SDK)
-    set(PLUGIN_SDK_TARGET plugIN_SDK)
+    FetchContent_MakeAvailable(octo_sdk)
+    set(OCTO_SDK_TARGET octo_sdk)
 else()
     if (WIN32)
         set(URL_OS win)
@@ -107,15 +107,15 @@ else()
     endif()
 
     FetchContent_Declare(
-    plugIN_SDK
-    URL     https://github.com/allxon/plugIN-sdk-v2/releases/download/${PLUGIN_SDK_VERSION}/plugIN_SDK-${PLUGIN_SDK_VERSION}-${URL_OS}-${URL_ARCH}.${URL_SUFFIX}
+    octo_sdk
+    URL     https://github.com/allxon/octo-sdk/releases/download/${OCTO_SDK_VERSION}/octo_sdk-${OCTO_SDK_VERSION}-${URL_OS}-${URL_ARCH}.${URL_SUFFIX}
     )
-    FetchContent_MakeAvailable(plugIN_SDK)
+    FetchContent_MakeAvailable(octo_sdk)
 
     if (WIN32)
-        set(PLUGIN_SDK_TARGET ${plugin_sdk_SOURCE_DIR}/lib/plugIN_SDK.lib)
+        set(OCTO_SDK_TARGET ${octo_sdk_SOURCE_DIR}/lib/octo_sdk.lib)
     elseif (UNIX AND NOT APPLE)
-        set(PLUGIN_SDK_TARGET ${plugin_sdk_SOURCE_DIR}/lib/libplugIN_SDK.a)
+        set(OCTO_SDK_TARGET ${octo_sdk_SOURCE_DIR}/lib/libocto_sdk.a)
     endif()
 endif()
 
@@ -133,7 +133,7 @@ if(WIN32 AND MSVC)
         set(OPENSSL_ARCH x64)
         set(OPENSSL_DLL_SUFFIX -x64)
     endif()
-    list(APPEND LINK_LIBS ${PLUGIN_SDK_TARGET}
+    list(APPEND LINK_LIBS ${OCTO_SDK_TARGET}
             ${PROJECT_SOURCE_DIR}/dep/openssl/win_${OPENSSL_ARCH}/lib/libcrypto.lib
             ${PROJECT_SOURCE_DIR}/dep/openssl/win_${OPENSSL_ARCH}/lib/libssl.lib)
     list(APPEND EXTRA_INCLUDES ${PROJECT_SOURCE_DIR}/dep/openssl/include)
@@ -146,10 +146,10 @@ if(WIN32 AND MSVC)
         COMMAND ${CMAKE_COMMAND} -E copy ${OPENSSL_DLL_PATH}libcrypto-1_1${OPENSSL_DLL_SUFFIX}.dll ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/ 
     )
 elseif(UNIX AND NOT APPLE)
-    list(APPEND LINK_LIBS ${PLUGIN_SDK_TARGET} -pthread -lcrypto -lssl)
+    list(APPEND LINK_LIBS ${OCTO_SDK_TARGET} -pthread -lcrypto -lssl)
 endif()
 
-list(APPEND EXTRA_INCLUDES ${plugin_sdk_SOURCE_DIR}/include
+list(APPEND EXTRA_INCLUDES ${octo_sdk_SOURCE_DIR}/include
                            ${PROJECT_SOURCE_DIR}/dep/asio/asio/include
                            ${PROJECT_SOURCE_DIR}/dep/websocketpp
                            ${PROJECT_SOURCE_DIR}/dep/cJSON
