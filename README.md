@@ -73,13 +73,6 @@ cmake --build build
 # Run after build
 # You can run plugin-hello directly under build/ folder, and pass resource_dir_linux through argument
 build/plugin-hello resource_dir_linux
-
-# Install Stage
-cmake --install build --prefix /opt/allxon/plugIN
-
-# Run after Install
-# and pass resource_dir_linux or installed directory through argument
-/opt/allxon/plugIN/[APP_GUID]/plugin-hello /opt/allxon/plugIN/[APP_GUID]
 ```
 
 ### Windows
@@ -93,13 +86,6 @@ cmake --build build --config <Debug|Release>
 @REM Run after build
 @REM You can run plugin-hello directly under build\ folder, and pass resource_dir_windows through argument
 build\<Debug|Release>\plugin-hello.exe resource_dir_windows
-
-@REM Install Stage
-cmake --install build --prefix C:\ProgramData\allxon\plugIN
-
-@REM Run after Install
-@REM and pass resource_dir_windows or installed directory through argument
-C:\ProgramData\allxon\plugIN\[APP_GUID]\plugin-hello.exe C:\ProgramData\allxon\plugIN\[APP_GUID]
 ```
 
 # How to Deploy & Install
