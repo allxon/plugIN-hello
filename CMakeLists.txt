@@ -170,6 +170,7 @@ if(WIN32 AND MSVC)
                      ${PROJECT_BINARY_DIR}/$<CONFIG>/libcrypto-1_1${OPENSSL_DLL_SUFFIX}.dll
                      ${PROJECT_BINARY_DIR}/$<CONFIG>/libssl-1_1${OPENSSL_DLL_SUFFIX}.dll
             DESTINATION ./${PLUGIN_APP_GUID})
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/dep/msvc/ DESTINATION ./${PLUGIN_APP_GUID})
 else()
     install(PROGRAMS ${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME} DESTINATION ./${PLUGIN_APP_GUID})
 endif()
