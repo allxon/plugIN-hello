@@ -120,6 +120,7 @@ sudo wget -qO - https://get.allxon.net/plugIN/linux | sudo  bash -s -- --app-gui
 ``` 
 
 ### Windows
+
 ```batch
 powershell -command "Invoke-WebRequest -OutFile %temp%\plugin-installer.bat https://get.allxon.net/plugIN/windows" && %temp%\plugin-installer.bat --app-guid [APP_GUID] --from-path [PLUGIN_PACKAGE]
 ```
