@@ -65,7 +65,7 @@ You can find `.dll` under `build/_deps/openssl_src/bin`.
 ### Linux
 ```bash
 # Configuration Stage
-cmake -S . -B build -DCMAKE_BUILD_TYPE=<Debug|Release> -DPLUGIN_KEY=plugin_key.json
+cmake -S . -B build -DCMAKE_BUILD_TYPE=<Debug|Release> -DPLUGIN_KEY=plugin_credential.json
 
 # Build Stage
 cmake --build build
@@ -78,7 +78,7 @@ build/plugin-hello resource_dir_linux
 ### Windows
 ```batch
 @REM Configuration Stage
-cmake -G "Visual Studio 16 2019" -A Win32 -S . -B "build" -DPLUGIN_KEY=plugin_key.json
+cmake -G "Visual Studio 16 2019" -A Win32 -S . -B "build" -DPLUGIN_KEY=plugin_credential.json
 
 @REM Build Stage
 cmake --build build --config <Debug|Release>
