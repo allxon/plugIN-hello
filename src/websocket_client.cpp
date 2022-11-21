@@ -93,11 +93,28 @@ void WebSocketClient::OnMessage(websocketpp::connection_hdl hdl, client::message
     const auto payload = msg->get_payload();
     std::cout << "OnMessage" << std::endl;
     std::cout << payload.c_str() << std::endl;
+
+    // Handle JSON-RPC error object
+    auto payload_cjson = cJSON_Parse(payload.c_str());
+    if (cJSON_HasObjectItem(payload_cjson, "error")) {
+        auto error_cjson = cJSON_GetObjectItemCaseSensitive(payload_cjson, "error");
+        auto error_code_cjson = cJSON_GetObjectItemCaseSensitive(error_cjson, "code");
+        auto error_code = cJSON_GetStringValue(error_code_cjson);
+        auto error_msg_cjson = cJSON_GetObjectItemCaseSensitive(error_cjson, "message");
+        auto error_msg = cJSON_GetStringValue(error_msg_cjson);
+        printf("Received JSON-RPC error object, error code: %s, error_message: %s\n", error_code, error_msg);
+        cJSON_Delete(payload_cjson);
+        return;
+    }
+    cJSON_Delete(payload_cjson);
+
+    // Verify payload
     std::string get_method;
     if (!m_json_validator->Verify(payload, get_method))
     {
         std::cout << m_json_validator->error_message() << std::endl;
-        exit(0);
+        printf("Received data verify failed: %s\n", m_json_validator->error_message().c_str());
+        return;
     }
     if (get_method == "v2/notifyPluginCommand")
     {
