@@ -1,16 +1,16 @@
-# Hello plugIN
-A Sample Allxon plugIN to help you understand Allxon plugIN framework.
+# Hello Plugin
+Below is a sample plugin to help you understand Allxon Octo framework.
 
 # Run Pre-Build Executable
 
 ## Install Allxon Agent
-plugIN infrastructure is base on Allxon Agent, You have to [install](https://www.allxon.com/knowledge/install-allxon-agent-via-command-prompt) first.
+The plugin infrastructure is based on Allxon Agent. To run the pre-build executable, [install](https://www.allxon.com/knowledge/install-allxon-agent-via-command-prompt) Allxon Agent first. 
 
-## Download plugIN package
-Get your platform archive from [release page](https://github.com/allxon/plugIN-hello/releases).
+## Download the Plugin Package
+Go to the [release page](https://github.com/allxon/plugIN-hello/releases), then download your platform archive.
 
 ## Extract and Run
-After downloaded archive, extract your archive and run it
+After your archive is downloaded, extract and run the archive.
 ```bash
 cd [EXTRACT_FOLDER_PATH]/[APP_GUID]
 ./plugin-hello $(pwd)
@@ -21,15 +21,15 @@ cd [EXTRACT_FOLDER_PATH]\[APP_GUID]
 plugin-hello.exe %cd%
 ```
 
-# Build From Source
+# Build from Source
 ## Clone all Submodule
 ```bash
 git clone --recurse-submodules https://github.com/allxon/plugIN-hello.git
 ```
 
-## Get plugIN Key
-_plugIN key_ repesent your plugIN identity, get your plugIN Key `plugin_key.json` from Allxon and Download in working directory, you should have `APP_GUID`, `ACCESS_KEY` in your `plugin_key.json`
-> **WARNING**: Each `plugin_key.json` bind one plugIN program, if your plugIN deploy different platform or different cpu architecture, means your need different `plugin_key.json` 
+## Obtain Plugin Credential
+You need to acquire a _Plugin Credential_, which represents your plugin identity. To do so, contact us to obtain `plugin_credential.json`, which includes a set of `APP_GUID` and `ACCESS_KEY`. 
+> **WARNING**: Each `plugin_credential.json` is paired with one plugin program. Different platforms or CPU architectures require different plugin credentials. Make sure you use the suitable `plugin_credential.json`. 
 
 ## Docker build
 ```bash
@@ -37,13 +37,13 @@ sudo docker build -f <Dockerfile.x86_64|Dockerfile.jetson> .
 ```
 
 ## Install CMake
-- CMake 3.23 - [install link](https://cmake.org/download/)
+- CMake 3.23 - [installation link](https://cmake.org/download/)
 
 ## Dependency
 - [Allxon Octo SDK](https://github.com/allxon/octo-sdk)
 - OpenSSL
 
-It will auto fetch _Octo SDK_ library when you configure cmake.
+The _Allxon Octo SDK_ library is auto fetched when you configure cmake.
 
 ### Linux Debian
 Install OpenSSL in Linux Debian.
@@ -53,66 +53,66 @@ apt-get update && apt-get install libssl-dev
 ```
 
 ### Other Linux Distribution 
-Follow install instruction on [OpenSSL offical site](https://www.openssl.org).
+Follow the installation instructions on the [OpenSSL official site](https://www.openssl.org).
 
 ### Windows
-It will auto fetch OpenSSL library when you configure cmake.
+The OpenSSL library is auto fetched when you configure cmake.
 
-You can found `.dll` under `build/_deps/openssl_src/bin`.
+You can find `.dll` under `build/_deps/openssl_src/bin`.
 
-## Build & Run
+## Build and Run
 
 ### Linux
 ```bash
 # Configuration Stage
-cmake -S . -B build -DCMAKE_BUILD_TYPE=<Debug|Release> -DPLUGIN_KEY=plugin_key.json
+cmake -S . -B build -DCMAKE_BUILD_TYPE=<Debug|Release> -DPLUGIN_KEY=plugin_credential.json
 
 # Build Stage
 cmake --build build
 
 # Run after build
-# You can run plugin-hello directly under build/ folder, and pass resource_dir_linux through argument
+# You can run plugin-hello directly under the build/ folder, and pass resource_dir_linux through argument
 build/plugin-hello resource_dir_linux
 ```
 
 ### Windows
 ```batch
 @REM Configuration Stage
-cmake -G "Visual Studio 16 2019" -A Win32 -S . -B "build" -DPLUGIN_KEY=plugin_key.json
+cmake -G "Visual Studio 16 2019" -A Win32 -S . -B "build" -DPLUGIN_KEY=plugin_credential.json
 
 @REM Build Stage
 cmake --build build --config <Debug|Release>
 
 @REM Run after build
-@REM You can run plugin-hello directly under build\ folder, and pass resource_dir_windows through argument
+@REM You can run plugin-hello directly under the build\ folder, and pass resource_dir_windows through argument
 build\<Debug|Release>\plugin-hello.exe resource_dir_windows
 ```
 
-# How to Deploy & Install
-_plugIN package_ is a archive repesent a plugIN in Allxon plugIN ecosystem.
+# How to Deploy and Install
+A _Plugin Package_ is an archived plugin which is workable with Allxon Plugin Center. (Contact us for detailed listing process)
 
-A plugIN package filename is named to `plugin-hello-[version]-linux-[arch].tar.gz` (linux) or `plugin-hello-[version]-win-[arch].zip` (windows). 
+The file naming convention of a plugin package is `plugin-hello-[version]-linux-[arch].tar.gz` (Linux) or `plugin-hello-[version]-win-[arch].zip` (Windows). 
 
-## Deploy plugIN packge 
+## Deploy Plugin Package 
 
 ### Linux
 ```bash
-# Deploy through docker, then you can get your plugIN package under OUTPUT_DIRECTORY 
+# Deploy through docker, then you can get your plugin package under OUTPUT_DIRECTORY 
 sudo docker build -f <Dockerfile.jetson|Dockerfile.x86_64> -o [OUTPUT_DIRECTORY] .
 ```
 ```bash
-# Deploy through cmake, then you can get your plugIN package under build directory
+# Deploy through cmake, then you can get your plugin package under build directory
 cmake --build build --target package
 ```
 
 ### Windows
 ```bash
-# Deploy through cmake, then you can get your plugIN package under build directory
+# Deploy through cmake, then you can get your plugin package under build directory
 cmake --build build --config <release|debug> --target package
 ```
 
-## Test plugIN Installation through plugIN online installer
-After packing plugIN package, you can test your plugIN package on local before upload to Allxon plugIN ecosystem. 
+## Test Plugin Installation through Plugin Installer Script
+After building the plugin package, use the following commands to install and test it on your device.
 
 ### Linux
 ```bash
@@ -124,9 +124,9 @@ sudo wget -qO - https://get.allxon.net/plugIN/linux | sudo  bash -s -- --app-gui
 powershell -command "Invoke-WebRequest -OutFile %temp%\plugin-installer.bat https://get.allxon.net/plugIN/windows" && %temp%\plugin-installer.bat --app-guid [APP_GUID] --from-path [PLUGIN_PACKAGE]
 ```
 
-After installed, plugIN will start automatically.
+Once installed, the plugin starts automatically.
 
-If you wanna uninstall plugIN, use following command
+If you want to uninstall the plugin, use the following commands:
  
 ### Linux 
 ```bash
@@ -138,8 +138,8 @@ sudo wget -qO - https://get.allxon.net/plugIN/linux | sudo bash -s -- --app-guid
 powershell -command "Invoke-WebRequest -OutFile %temp%\plugin-installer.bat https://get.allxon.net/plugIN/windows" && %temp%\plugin-installer.bat --app-guid [APP_GUID] --remove
 ```
 
-# Getting Start
-After configure cmake, cmake would create `WORKSPACE/build/build_info.h`, so you can use following predefined marco:
+# Getting Started
+Once configured, cmake creates `WORKSPACE/build/build_info.h`. You can use the following predefined marcos:
 - `PLUGIN_NAME` 
 - `PLUGIN_APP_GUID`
 - `PLUGIN_ACCESS_KEY`
@@ -161,14 +161,14 @@ int main(int argc, char **argv)
     std::string other_plugin_api_json_content;
     if (json_validator.Sign(other_plugin_api_json_content))
     {
-        // if sign success, you can send it through websocket
+        // if sign-in is successful, you can send it through websocket
         // e.g. 
         // enpoint.send(other_plugin_api_json_content);
     }
 
     if (json_validator.Verify(other_plugin_api_json_content))
     {
-        // if verify success, means json content is safe, you can read it
+        // if verification is successful, it means json content is safe, and you can read it
     }
     return 0;
 }
