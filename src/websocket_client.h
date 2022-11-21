@@ -73,7 +73,6 @@ private:
     websocketpp::connection_hdl m_hdl;
     mutable std::mutex m_mutex;
     websocketpp::lib::shared_ptr<std::thread> m_run_thread;
-    websocketpp::lib::shared_ptr<std::thread> m_send_thread;
     std::shared_ptr<Allxon::JsonValidator> m_json_validator;
     std::queue<std::string> m_cmd_accept_queue;
     std::queue<std::string> m_cmd_ack_queue;
