@@ -52,13 +52,9 @@ Install OpenSSL in Linux Debian.
 apt-get update && apt-get install libssl-dev
 ```
 
-### Other Linux Distribution 
+### Other Linux Distribution & Windows
 Follow the installation instructions on the [OpenSSL official site](https://www.openssl.org).
 
-### Windows
-The OpenSSL library is auto fetched when you configure cmake.
-
-You can find `.dll` under `build/_deps/openssl_src/bin`.
 
 ## Build and Run
 
