@@ -134,17 +134,10 @@ if(WIN32 AND MSVC)
         set(OPENSSL_DLL_SUFFIX -x64)
     endif()
     list(APPEND LINK_LIBS ${OCTO_SDK_TARGET}
+            Crypt32.lib
             ${PROJECT_SOURCE_DIR}/dep/openssl/win_${OPENSSL_ARCH}/lib/libcrypto.lib
             ${PROJECT_SOURCE_DIR}/dep/openssl/win_${OPENSSL_ARCH}/lib/libssl.lib)
     list(APPEND EXTRA_INCLUDES ${PROJECT_SOURCE_DIR}/dep/openssl/include)
-
-    set(OPENSSL_DLL_PATH ${PROJECT_SOURCE_DIR}/dep/openssl/win_${OPENSSL_ARCH}/bin/)
-    add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy ${OPENSSL_DLL_PATH}libssl-1_1${OPENSSL_DLL_SUFFIX}.dll ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/
-    )
-    add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy ${OPENSSL_DLL_PATH}libcrypto-1_1${OPENSSL_DLL_SUFFIX}.dll ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/ 
-    )
 elseif(UNIX AND NOT APPLE)
     list(APPEND LINK_LIBS ${OCTO_SDK_TARGET} -pthread -lcrypto -lssl)
 endif()

@@ -78,7 +78,7 @@ build/plugin-hello resource_dir_linux
 ### Windows
 ```batch
 @REM Configuration Stage
-cmake -G "Visual Studio 16 2019" -A Win32 -S . -B "build" -DPLUGIN_KEY=plugin_credential.json
+cmake -G "Visual Studio 16 2019" -A Win32 -S . -B "build" -DPLUGIN_KEY=plugin_credential
 
 @REM Build Stage
 cmake --build build --config <Debug|Release>
