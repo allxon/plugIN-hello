@@ -74,14 +74,14 @@ build/plugin-hello resource_dir_linux
 ### Windows
 ```batch
 @REM Configuration Stage
-cmake -G "Visual Studio 16 2019" -A Win32 -S . -B "build" -DPLUGIN_KEY=plugin_credential.json
+cmake -G "Visual Studio 16 2019" -A x64 -S . -B "build" -DPLUGIN_KEY=plugin_credential.json
 
 @REM Build Stage
-cmake --build build --config <Debug|Release>
+cmake --build build --config Release
 
 @REM Run after build
 @REM You can run plugin-hello directly under the build\ folder, and pass resource_dir_windows through argument
-build\<Debug|Release>\plugin-hello.exe resource_dir_windows
+build\Release\plugin-hello.exe resource_dir_windows
 ```
 
 # How to Deploy and Install
