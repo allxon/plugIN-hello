@@ -1,5 +1,7 @@
 FROM --platform=linux/arm64 nvcr.io/nvidia/l4t-base:r32.6.1 AS install-dependency
 RUN apt-get update && apt-get install -y \
+	ca-certificates \
+	git \
 	wget \
 	g++ \
 	make \
@@ -11,7 +13,7 @@ RUN tar -xf cmake-3.23.2-linux-aarch64.tar.gz && cp -r cmake-3.23.2-linux-aarch6
 FROM install-dependency AS build-stage
 COPY . /app
 WORKDIR /app
-RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=release -DPLUGIN_KEY=plugin_key.json
+RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=release -DPLUGIN_KEY=plugin_credential.json
 RUN cmake --build build --target package
 
 FROM scratch AS output-stage

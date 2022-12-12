@@ -12,21 +12,16 @@ Go to the [release page](https://github.com/allxon/plugIN-hello/releases), then 
 ## Extract and Run
 After your archive is downloaded, extract and run the archive.
 ```bash
-cd [EXTRACT_FOLDER_PATH]/[APP_GUID]
+cd <EXTRACT_FOLDER_PATH>/<APP_GUID>
 ./plugin-hello $(pwd)
 ```
 or Windows cmd.
 ```batch
-cd [EXTRACT_FOLDER_PATH]\[APP_GUID]
+cd <EXTRACT_FOLDER_PATH>\<APP_GUID>
 plugin-hello.exe %cd%
 ```
 
 # Build from Source
-## Clone all Submodule
-```bash
-git clone --recurse-submodules https://github.com/allxon/plugIN-hello.git
-```
-
 ## Obtain Plugin Credential
 You need to acquire a _Plugin Credential_, which represents your plugin identity. To do so, contact us to obtain `plugin_credential.json`, which includes a set of `APP_GUID` and `ACCESS_KEY`. 
 > **WARNING**: Each `plugin_credential.json` is paired with one plugin program. Different platforms or CPU architectures require different plugin credentials. Make sure you use the suitable `plugin_credential.json`. 
@@ -74,14 +69,14 @@ build/plugin-hello resource_dir_linux
 ### Windows
 ```batch
 @REM Configuration Stage
-cmake -G "Visual Studio 16 2019" -A Win32 -S . -B "build" -DPLUGIN_KEY=plugin_credential.json
+cmake -G "Visual Studio 16 2019" -A x64 -S . -B "build" -DPLUGIN_KEY=plugin_credential.json
 
 @REM Build Stage
-cmake --build build --config <Debug|Release>
+cmake --build build --config Release
 
 @REM Run after build
 @REM You can run plugin-hello directly under the build\ folder, and pass resource_dir_windows through argument
-build\<Debug|Release>\plugin-hello.exe resource_dir_windows
+build\Release\plugin-hello.exe resource_dir_windows
 ```
 
 # How to Deploy and Install
@@ -94,7 +89,7 @@ The file naming convention of a plugin package is `plugin-hello-[version]-linux-
 ### Linux
 ```bash
 # Deploy through docker, then you can get your plugin package under OUTPUT_DIRECTORY 
-sudo docker build -f <Dockerfile.jetson|Dockerfile.x86_64> -o [OUTPUT_DIRECTORY] .
+sudo docker build -f <Dockerfile.jetson|Dockerfile.x86_64> -o <OUTPUT_DIRECTORY> .
 ```
 ```bash
 # Deploy through cmake, then you can get your plugin package under build directory
@@ -112,12 +107,12 @@ After building the plugin package, use the following commands to install and tes
 
 ### Linux
 ```bash
-sudo wget -qO - https://get.allxon.net/plugIN/linux | sudo  bash -s -- --app-guid [APP_GUID] --from-path [PLUGIN_PACKAGE]
+sudo bash -c "$(wget -qO - https://get.allxon.net/plugIN/linux)" -s --app-guid <APP_GUID> --from-path <PLUGIN_PACKAGE>
 ``` 
 
 ### Windows
 ```batch
-powershell -command "Invoke-WebRequest -OutFile %temp%\plugin-installer.bat https://get.allxon.net/plugIN/windows" && %temp%\plugin-installer.bat --app-guid [APP_GUID] --from-path [PLUGIN_PACKAGE]
+powershell -command "Invoke-WebRequest -OutFile %temp%\plugin-installer.bat https://get.allxon.net/plugIN/windows" && %temp%\plugin-installer.bat --app-guid <APP_GUID> --from-path <PLUGIN_PACKAGE>
 ```
 
 Once installed, the plugin starts automatically.
@@ -126,12 +121,12 @@ If you want to uninstall the plugin, use the following commands:
  
 ### Linux 
 ```bash
-sudo wget -qO - https://get.allxon.net/plugIN/linux | sudo bash -s -- --app-guid [APP_GUID] --remove
+sudo bash -c "$(wget -qO - https://get.allxon.net/plugIN/linux)" -s --app-guid <APP_GUID> --uninstall
 ``` 
 
 ### Windows
 ```batch
-powershell -command "Invoke-WebRequest -OutFile %temp%\plugin-installer.bat https://get.allxon.net/plugIN/windows" && %temp%\plugin-installer.bat --app-guid [APP_GUID] --remove
+powershell -command "Invoke-WebRequest -OutFile %temp%\plugin-installer.bat https://get.allxon.net/plugIN/windows" && %temp%\plugin-installer.bat --app-guid <APP_GUID> --uninstall
 ```
 
 # Getting Started
