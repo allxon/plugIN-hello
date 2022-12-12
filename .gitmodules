@@ -1,9 +1,0 @@
-[submodule "dep/cJSON"]
-	path = dep/cJSON
-	url = https://github.com/DaveGamble/cJSON.git
-[submodule "dep/websocketpp"]
-	path = dep/websocketpp
-	url = https://github.com/zaphoyd/websocketpp.git
-[submodule "dep/asio"]
-	path = dep/asio
-	url = https://github.com/chriskohlhoff/asio.git

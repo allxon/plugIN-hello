@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
 project(plugin-hello VERSION 1.0.1)
-set(OCTO_SDK_VERSION 3.0.1)
+set(OCTO_SDK_VERSION 3.0.2)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -10,7 +10,7 @@ set(PLUGIN_NAME ${CMAKE_PROJECT_NAME})
 set(PLUGIN_VERSION ${PROJECT_VERSION})
 
 # Check and Parse plugin_key
-set(PLUGIN_KEY ${CMAKE_SOURCE_DIR}/plugin_key.json CACHE FILEPATH "plugIN key file")
+set(PLUGIN_KEY ${CMAKE_SOURCE_DIR}/plugin_credential.json CACHE FILEPATH "plugin credential file")
 if(NOT EXISTS ${PLUGIN_KEY})
     message(FATAL_ERROR "can't found ${PLUGIN_KEY}")
 endif()
@@ -86,7 +86,71 @@ message("PLUGIN_APP_GUID: ${PLUGIN_APP_GUID}")
 message("PLUGIN_ACCESS_KEY: ${PLUGIN_ACCESS_KEY}")
 message("BUILD_FROM_SDK_SRC: ${BUILD_FROM_SDK_SRC}")
 
+### OpenSSL library, linux(use system), windows(.lib binary)
+if(WIN32 AND MSVC)
+    set(OPENSSL_DIR ${PROJECT_SOURCE_DIR}/dep/openssl)
+    if("${PLUGIN_ARCH}" STREQUAL "x86")
+        set(OPENSSL_ARCH x86)
+    else()
+        set(OPENSSL_ARCH x64)
+        set(OPENSSL_DLL_SUFFIX -x64)
+    endif()
+    list(APPEND LINK_LIBS 
+            Crypt32.lib
+            ${PROJECT_SOURCE_DIR}/dep/openssl/win_${OPENSSL_ARCH}/lib/libcrypto.lib
+            ${PROJECT_SOURCE_DIR}/dep/openssl/win_${OPENSSL_ARCH}/lib/libssl.lib)
+    list(APPEND EXTRA_INCLUDES ${PROJECT_SOURCE_DIR}/dep/openssl/include)
+elseif(UNIX AND NOT APPLE)
+    set(OPENSSL_USE_STATIC_LIBS true)
+    find_package(OpenSSL REQUIRED COMPONENTS Crypto SSL)
+    list (APPEND LINK_LIBS OpenSSL::SSL OpenSSL::Crypto)
+endif()
+
 include(FetchContent)
+
+### cJSON library
+FetchContent_Declare(
+    cjson
+    GIT_REPOSITORY https://github.com/DaveGamble/cJSON.git
+    GIT_TAG        v1.7.15
+)
+# we don't wanna 'subdirectory(cjson)', cuz we don't wanna trigger cjson project's install when call '--target package'
+FetchContent_GetProperties(cjson)
+if(NOT cjson_POPULATED)
+  FetchContent_Populate(cjson)
+endif()
+set(CJSON_SOURCE_FILE ${cjson_SOURCE_DIR}/cJSON.c)
+message("cjson library fetched")
+
+### websocketpp library
+FetchContent_Declare(
+    websocketpp
+    GIT_REPOSITORY https://github.com/zaphoyd/websocketpp.git
+    GIT_TAG       0.8.2 
+)
+FetchContent_MakeAvailable(websocketpp)
+message("websocketpp library fetched")
+
+### ASIO library: set websocket to use C++ STL and non-Boost 
+FetchContent_Declare(
+    asio
+    GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
+    GIT_TAG        asio-1-24-0
+)
+FetchContent_MakeAvailable(asio)
+if (MSVC)
+    add_definitions (-D_WEBSOCKETPP_CPP11_FUNCTIONAL_)
+    add_definitions (-D_WEBSOCKETPP_CPP11_SYSTEM_ERROR_)
+    add_definitions (-D_WEBSOCKETPP_CPP11_RANDOM_DEVICE_)
+    add_definitions (-D_WEBSOCKETPP_CPP11_MEMORY_)
+    add_definitions (-D_WEBSOCKETPP_CPP11_TYPE_TRAITS_)
+else()
+    add_definitions (-D_WEBSOCKETPP_CPP11_STL_)
+endif()
+add_definitions (-DASIO_STANDALONE)
+message("ASIO library fetched")
+
+### octo-sdk library
 if (BUILD_FROM_SDK_SRC)
     FetchContent_Declare(
         octo_sdk
@@ -95,6 +159,7 @@ if (BUILD_FROM_SDK_SRC)
     )
     FetchContent_MakeAvailable(octo_sdk)
     set(OCTO_SDK_TARGET octo_sdk)
+    message("octo-sdk library (source) fetched")
 else()
     if (WIN32)
         set(URL_OS win)
@@ -105,53 +170,37 @@ else()
         set(URL_SUFFIX tar.gz)
         set(URL_ARCH ${CMAKE_HOST_SYSTEM_PROCESSOR})
     endif()
-
     FetchContent_Declare(
     octo_sdk
     URL     https://github.com/allxon/octo-sdk/releases/download/${OCTO_SDK_VERSION}/octo_sdk-${OCTO_SDK_VERSION}-${URL_OS}-${URL_ARCH}.${URL_SUFFIX}
     )
     FetchContent_MakeAvailable(octo_sdk)
-
     if (WIN32)
         set(OCTO_SDK_TARGET ${octo_sdk_SOURCE_DIR}/lib/octo_sdk.lib)
     elseif (UNIX AND NOT APPLE)
         set(OCTO_SDK_TARGET ${octo_sdk_SOURCE_DIR}/lib/libocto_sdk.a)
     endif()
+    message("octo-sdk library (binary) fetched")
 endif()
+list(APPEND LINK_LIBS ${OCTO_SDK_TARGET})
 
-configure_file(build_info.h.in build_info.h @ONLY)
+### build executable
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 aux_source_directory(${PROJECT_SOURCE_DIR}/src SOURCE_FILE)
-add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILE} ${PROJECT_SOURCE_DIR}/dep/cJSON/cJSON.c )
-
-if(WIN32 AND MSVC)
-    add_definitions (-D_WEBSOCKETPP_CPP11_STL_)
-    set(OPENSSL_DIR ${PROJECT_SOURCE_DIR}/dep/openssl)
-    if("${PLUGIN_ARCH}" STREQUAL "x86")
-        set(OPENSSL_ARCH x86)
-    else()
-        set(OPENSSL_ARCH x64)
-        set(OPENSSL_DLL_SUFFIX -x64)
-    endif()
-    list(APPEND LINK_LIBS ${OCTO_SDK_TARGET}
-            Crypt32.lib
-            ${PROJECT_SOURCE_DIR}/dep/openssl/win_${OPENSSL_ARCH}/lib/libcrypto.lib
-            ${PROJECT_SOURCE_DIR}/dep/openssl/win_${OPENSSL_ARCH}/lib/libssl.lib)
-    list(APPEND EXTRA_INCLUDES ${PROJECT_SOURCE_DIR}/dep/openssl/include)
-elseif(UNIX AND NOT APPLE)
-    list(APPEND LINK_LIBS ${OCTO_SDK_TARGET} -pthread -lcrypto -lssl)
-endif()
+add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILE} ${CJSON_SOURCE_FILE})
 
 list(APPEND EXTRA_INCLUDES ${octo_sdk_SOURCE_DIR}/include
-                           ${PROJECT_SOURCE_DIR}/dep/asio/asio/include
-                           ${PROJECT_SOURCE_DIR}/dep/websocketpp
-                           ${PROJECT_SOURCE_DIR}/dep/cJSON
+                           ${asio_SOURCE_DIR}/asio/include
+                           ${websocketpp_SOURCE_DIR}
+                           ${cjson_SOURCE_DIR}
     )
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${LINK_LIBS})
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC 
                             ${EXTRA_INCLUDES}
                             )
+
+configure_file(build_info.h.in build_info.h @ONLY)
 
 # install stage
 install(DIRECTORY ${PLUGIN_MATERIAL_DIR}/ DESTINATION ./${PLUGIN_APP_GUID}

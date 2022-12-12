@@ -8,7 +8,6 @@
 #include "cJSON.h"
 #include "json_validator.h"
 
-#define ASIO_STANDALONE
 #include "websocketpp/config/asio_client.hpp"
 #include "websocketpp/client.hpp"
 
