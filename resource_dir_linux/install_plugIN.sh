@@ -42,7 +42,7 @@ Type=simple
 ExecStart=${ALLXON_PLUGIN_DIR}/${PLUGIN_NAME} ${ALLXON_PLUGIN_DIR}
 Environment="HOME=/root"
 Restart=always
-RestartSec=5
+RestartSec=60
 
 [Install]
 WantedBy=multi-user.target
