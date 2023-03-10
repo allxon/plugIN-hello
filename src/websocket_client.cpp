@@ -1,8 +1,8 @@
 #include "websocket_client.h"
 #include "build_info.h"
 
-WebSocketClient::WebSocketClient(std::shared_ptr<Allxon::JsonValidator> json_validator, const std::string &url)
-    : m_json_validator(json_validator), m_url(url), received_person_("nobody"), alert_enabled_(false), alert_trigger_(false)
+WebSocketClient::WebSocketClient(std::shared_ptr<Allxon::JsonValidator> json_validator)
+    : m_json_validator(json_validator), received_person_("nobody"), alert_enabled_(false), alert_trigger_(false)
 {
     m_endpoint.set_reuse_addr(true);
     m_endpoint.clear_access_channels(websocketpp::log::alevel::all);
@@ -37,7 +37,7 @@ void WebSocketClient::Connect(const std::string &url)
 
 void WebSocketClient::RunSendingLoop()
 {
-    Connect(m_url);
+    Connect(m_json_validator->GetWebSocketConnectUrl());
     int count = 0;
     while (true)
     {

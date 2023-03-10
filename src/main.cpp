@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     auto json_validator = std::make_shared<JsonValidator>(PLUGIN_NAME, PLUGIN_APP_GUID,
                                                           PLUGIN_ACCESS_KEY, PLUGIN_VERSION,
                                                           np_update_json);
-    WebSocketClient web_client(json_validator, "wss://127.0.0.1:55688");
+    WebSocketClient web_client(json_validator);
     web_client.RunSendingLoop();
     return 0;
 }

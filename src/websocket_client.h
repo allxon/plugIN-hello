@@ -40,7 +40,7 @@ public:
 class WebSocketClient
 {
 public:
-    WebSocketClient(std::shared_ptr<Allxon::JsonValidator> json_validator, const std::string &url);
+    WebSocketClient(std::shared_ptr<Allxon::JsonValidator> json_validator);
     ~WebSocketClient();
 
     void RunSendingLoop();
@@ -75,7 +75,6 @@ private:
     std::shared_ptr<Allxon::JsonValidator> m_json_validator;
     std::queue<std::string> m_cmd_accept_queue;
     std::queue<std::string> m_cmd_ack_queue;
-    std::string m_url;
     std::string received_person_;
     bool alert_enabled_;
     bool alert_trigger_;
