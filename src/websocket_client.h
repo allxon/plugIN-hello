@@ -40,8 +40,12 @@ public:
 class WebSocketClient
 {
 public:
-    WebSocketClient(std::shared_ptr<Allxon::JsonValidator> json_validator);
+    WebSocketClient(std::shared_ptr<Allxon::JsonValidator> json_validator, const std::string& np_update_json);
     ~WebSocketClient();
+    void Connect();
+    void SendPluginStatesMetrics();
+    void SendPluginCommandAck();
+    void SendPluginAlert();
 
     void RunSendingLoop();
 
@@ -53,9 +57,8 @@ private:
     void OnFail(websocketpp::connection_hdl hdl);
     void OnMessage(websocketpp::connection_hdl hdl, client::message_ptr msg);
     void SendNotifyPluginUpdate();
-    void SendPluginStatesMetrics();
     void SendPluginCommandAck(std::queue<std::string> &queue);
-    void SendPluginAlert();
+    void SendPluginAlertInternal();
     void PushCommandQueue(std::queue<std::string> &queue, std::string data);
     bool PopCommandQueue(std::queue<std::string> &queue, std::string &pop_data);
 
@@ -73,6 +76,7 @@ private:
     mutable std::mutex m_mutex;
     websocketpp::lib::shared_ptr<std::thread> m_run_thread;
     std::shared_ptr<Allxon::JsonValidator> m_json_validator;
+    std::string np_update_json_;
     std::queue<std::string> m_cmd_accept_queue;
     std::queue<std::string> m_cmd_ack_queue;
     std::string received_person_;

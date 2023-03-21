@@ -1,8 +1,8 @@
 #include "websocket_client.h"
 #include "build_info.h"
 
-WebSocketClient::WebSocketClient(std::shared_ptr<Allxon::JsonValidator> json_validator)
-    : m_json_validator(json_validator), received_person_("nobody"), alert_enabled_(false), alert_trigger_(false)
+WebSocketClient::WebSocketClient(std::shared_ptr<Allxon::JsonValidator> json_validator, const std::string& np_update_json)
+    : m_json_validator(json_validator), np_update_json_(np_update_json), received_person_("nobody"), alert_enabled_(false), alert_trigger_(false)
 {
     m_endpoint.set_reuse_addr(true);
     m_endpoint.clear_access_channels(websocketpp::log::alevel::all);
@@ -20,6 +20,28 @@ WebSocketClient::WebSocketClient(std::shared_ptr<Allxon::JsonValidator> json_val
 }
 WebSocketClient::~WebSocketClient()
 {
+    m_endpoint.close(m_hdl, websocketpp::close::status::normal, "close");
+    m_run_thread->join();
+}
+
+void WebSocketClient::SendPluginCommandAck()
+{
+    SendPluginCommandAck(m_cmd_accept_queue);
+    SendPluginCommandAck(m_cmd_ack_queue);
+}
+
+void WebSocketClient::SendPluginAlert()
+{
+    if (alert_trigger()) {
+        if (is_alert_enabled())
+            SendPluginAlertInternal();
+        set_alert_trigger(false);
+    }
+}
+
+void WebSocketClient::Connect()
+{
+    Connect(m_json_validator->GetWebSocketConnectUrl());
 }
 
 void WebSocketClient::Connect(const std::string &url)
@@ -51,7 +73,7 @@ void WebSocketClient::RunSendingLoop()
         }
         if (alert_trigger()) {
             if (is_alert_enabled())
-                SendPluginAlert();
+                SendPluginAlertInternal();
             set_alert_trigger(false);
         }
     }
@@ -79,7 +101,6 @@ void WebSocketClient::OnClose(websocketpp::connection_hdl hdl)
 {
     std::cout << "OnClose" << std::endl;
     m_endpoint.stop();
-    exit(0);
 }
 void WebSocketClient::OnFail(websocketpp::connection_hdl hdl)
 {
@@ -179,8 +200,7 @@ void WebSocketClient::OnMessage(websocketpp::connection_hdl hdl, client::message
 void WebSocketClient::SendNotifyPluginUpdate()
 {
     std::cout << "SendNotifyPluginUpdate" << std::endl;
-    std::string notify_plugin_update = Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_update_template.json");
-    auto np_update_cjson = cJSON_Parse(notify_plugin_update.c_str());
+    auto np_update_cjson = cJSON_Parse(np_update_json_.c_str());
     auto params_cjson = cJSON_GetObjectItemCaseSensitive(np_update_cjson, "params");
     auto modules_cjson = cJSON_GetObjectItemCaseSensitive(params_cjson, "modules");
     auto module_cjson = cJSON_GetArrayItem(modules_cjson, 0);
@@ -243,7 +263,7 @@ void WebSocketClient::SendPluginCommandAck(std::queue<std::string> &queue)
     }
 }
 
-void WebSocketClient::SendPluginAlert()
+void WebSocketClient::SendPluginAlertInternal()
 {
     std::cout << "SendPluginAlert" << std::endl;
     std::string notify_plugin_alert = Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_alert.json");
