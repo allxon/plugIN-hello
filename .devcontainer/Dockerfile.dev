@@ -8,8 +8,8 @@ RUN apt-get update && apt-get install -y \
 	libssl-dev \
 	git \
 	&& rm -rf /var/lib/apt/lists/*
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.23.2/cmake-3.23.2-linux-x86_64.tar.gz
-RUN tar -xf cmake-3.23.2-linux-x86_64.tar.gz && cp -r cmake-3.23.2-linux-x86_64/* /usr
+COPY .devcontainer /.devcontainer
+RUN /bin/bash /.devcontainer/install_cmake.sh 3.23.2
 
 FROM install-dependency AS build-stage
 COPY . /app
