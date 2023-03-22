@@ -1,6 +1,5 @@
 #!/bin/bash
 CURRENT_SH_DIRECTORY=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-exec &> "${CURRENT_SH_DIRECTORY}/$(basename "${BASH_SOURCE[0]%.*}").output"
 
 PLUGIN_NAME=plugin-hello
 PLUGIN_SERVICE=${PLUGIN_NAME}.service
