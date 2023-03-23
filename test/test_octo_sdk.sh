@@ -1,5 +1,10 @@
 #!/bin/bash -e
 
+err() {
+    printf "${RED}ERROR: %s\n${NC}" "$1" >&2
+    exit 1
+}
+
 get_dockerfile_by_arch() {
     local ostype="$(uname -s)"
     local cputype="$(uname -m)"
@@ -49,7 +54,7 @@ PLUGIN_PACKAGE="hello_plugin.tar.gz"
 DOCKERFILE=$(get_dockerfile_by_arch)
 
 mkdir ${OUTPUT_DIR}
-docker build -f ${DOCKERFILE} --progress=plain --build-arg OCTO_SDK_VERSION=${SDK_VERSION} --build-arg OUTPUT_NAME=${PLUGIN_PACKAGE} --output ${OUTPUT_DIR} .
+docker buildx build -f ${DOCKERFILE} --progress=plain --build-arg OCTO_SDK_VERSION=${SDK_VERSION} --build-arg OUTPUT_NAME=${PLUGIN_PACKAGE} --output ${OUTPUT_DIR} .
 tar -xzf ${OUTPUT_DIR}/${PLUGIN_PACKAGE} -C ${OUTPUT_DIR}
 ./${OUTPUT_DIR}/${APP_GUID}/${EXECUTABLE_NAME} ${OUTPUT_DIR}/${APP_GUID}
 
