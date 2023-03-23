@@ -12,10 +12,8 @@ COPY .devcontainer /.devcontainer
 RUN /bin/bash /.devcontainer/install_cmake.sh 3.23.2
 
 FROM install-dependency AS build-stage
+ARG OCTO_SDK_VERSION
 COPY . /app
 WORKDIR /app
-RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=release -DPLUGIN_KEY=plugin_credential.json
+RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=release -DPLUGIN_KEY=plugin_credential.json -DOCTO_SDK_VERSION=$OCTO_SDK_VERSION
 RUN cmake --build build --target package
-
-FROM scratch AS output-stage
-COPY --from=build-stage /app/build/*.tar.gz / 

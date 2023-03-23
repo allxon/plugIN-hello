@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
 project(plugin-hello VERSION 1.0.1)
-set(OCTO_SDK_VERSION 3.1.0)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -73,6 +72,8 @@ if(NOT EXISTS ${PLUGIN_MATERIAL_UNINSTALL_SH})
 else()
     message(CHECK_PASS "found")
 endif()
+
+set(OCTO_SDK_VERSION 3.1.0 CACHE STRING "octo sdk version")
 
 message("=================== CMAKE_DIR : ${CMAKE_SOURCE_DIR} ======================")
 message("PLUGIN_NAME: ${PLUGIN_NAME}")

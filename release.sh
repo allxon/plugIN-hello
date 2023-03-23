@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 TARGET_VERSION=$1
 REGEX="project\((.+) VERSION (.+)\)"
 
