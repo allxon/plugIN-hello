@@ -1,6 +1,5 @@
 #include <iostream>
 #include "json_validator.h"
-#include "build_info.h"
 #include "websocket_client.h"
 
 using namespace Allxon;

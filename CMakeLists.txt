@@ -45,6 +45,12 @@ else()
     message(FATAL_ERROR "current os is not support")
 endif()
 
+add_compile_definitions(
+    PLUGIN_NAME="${PLUGIN_NAME}"
+    PLUGIN_VERSION="${PLUGIN_VERSION}"
+    PLUGIN_APP_GUID="${PLUGIN_APP_GUID}"
+    PLUGIN_ACCESS_KEY="${PLUGIN_ACCESS_KEY}"
+    )
 
 # Check plugin package materials
 if(WIN32)
@@ -200,8 +206,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${LINK_LIBS})
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC 
                             ${EXTRA_INCLUDES}
                             )
-
-configure_file(build_info.h.in build_info.h @ONLY)
 
 # install stage
 install(DIRECTORY ${PLUGIN_MATERIAL_DIR}/ DESTINATION ./${PLUGIN_APP_GUID}
