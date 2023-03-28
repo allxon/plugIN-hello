@@ -1,5 +1,4 @@
 #include "websocket_client.h"
-#include "build_info.h"
 
 WebSocketClient::WebSocketClient(std::shared_ptr<Allxon::JsonValidator> json_validator)
     : m_json_validator(json_validator), received_person_("nobody"), alert_enabled_(false), alert_trigger_(false)
@@ -49,7 +48,8 @@ void WebSocketClient::RunSendingLoop()
             SendPluginStatesMetrics();
             count = 0;
         }
-        if (alert_trigger()) {
+        if (alert_trigger())
+        {
             if (is_alert_enabled())
                 SendPluginAlert();
             set_alert_trigger(false);
@@ -96,7 +96,8 @@ void WebSocketClient::OnMessage(websocketpp::connection_hdl hdl, client::message
 
     // Handle JSON-RPC error object
     auto payload_cjson = cJSON_Parse(payload.c_str());
-    if (cJSON_HasObjectItem(payload_cjson, "error")) {
+    if (cJSON_HasObjectItem(payload_cjson, "error"))
+    {
         auto error_cjson = cJSON_GetObjectItemCaseSensitive(payload_cjson, "error");
         auto error_code_cjson = cJSON_GetObjectItemCaseSensitive(error_cjson, "code");
         auto error_code = cJSON_GetStringValue(error_code_cjson);
@@ -137,11 +138,21 @@ void WebSocketClient::OnMessage(websocketpp::connection_hdl hdl, client::message
         auto accept_command_id_cjson = cJSON_GetObjectItemCaseSensitive(accept_params_cjson, "commandId");
         auto accept_command_state_cjson = cJSON_GetObjectItemCaseSensitive(accept_params_cjson, "commandState");
         cJSON_SetValuestring(accept_command_id_cjson, command_id_cjson->valuestring);
-        cJSON_SetValuestring(accept_command_state_cjson, "ACCEPTED");
         auto accept_command_acks_cjson = cJSON_GetObjectItemCaseSensitive(accept_params_cjson, "commandAcks");
         auto accept_command_ack_cjson = cJSON_GetArrayItem(accept_command_acks_cjson, 0);
         auto accept_result_cjson = cJSON_GetObjectItemCaseSensitive(accept_command_ack_cjson, "result");
         cJSON_AddStringToObject(accept_result_cjson, "response", std::string("Hello " + received_person()).c_str());
+
+        std::string notify_plugin_state = Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_state.json");
+        auto np_state_cjson = cJSON_Parse(notify_plugin_state.c_str());
+        auto state_params_cjson = cJSON_GetObjectItemCaseSensitive(np_state_cjson, "params");
+        auto states_cjson = cJSON_GetObjectItemCaseSensitive(state_params_cjson, "states");
+        auto state_cjson = cJSON_GetArrayItem(states_cjson, 0);
+        auto state_value_cjson = cJSON_GetObjectItemCaseSensitive(state_cjson, "value");
+        cJSON_SetValuestring(state_value_cjson, std::string("Hello " + received_person() + " ~").c_str());
+        cJSON_AddItemToObject(accept_params_cjson, "states", cJSON_Duplicate(states_cjson, true));
+
+        cJSON_SetValuestring(accept_command_state_cjson, "ACCEPTED");
         char *cmd_accept_str = cJSON_Print(cmd_accept_cjson);
         PushCommandQueue(m_cmd_accept_queue, std::string(cmd_accept_str));
         delete cmd_accept_str;
@@ -153,6 +164,7 @@ void WebSocketClient::OnMessage(websocketpp::connection_hdl hdl, client::message
 
         cJSON_Delete(cmd_cjson);
         cJSON_Delete(cmd_accept_cjson);
+        cJSON_Delete(np_state_cjson);
 
         set_alert_trigger(true);
     }
