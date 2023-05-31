@@ -11,10 +11,10 @@ RUN wget --no-check-certificate https://github.com/Kitware/CMake/releases/downlo
 RUN tar -xf cmake-3.23.2-linux-aarch64.tar.gz && cp -r cmake-3.23.2-linux-aarch64/* /usr
 
 FROM install-dependency AS build-stage
-ARG OCTO_SDK_VERSION=3.1.0
+ARG CMAKE_ARGS
 COPY . /app
 WORKDIR /app
-RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=release -DPLUGIN_KEY=plugin_credential.json -DOCTO_SDK_VERSION=$OCTO_SDK_VERSION
+RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=release -DPLUGIN_KEY=plugin_credential.json $CMAKE_ARGS
 RUN cmake --build build --target package
 
 FROM scratch AS output-stage
