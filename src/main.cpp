@@ -1,5 +1,5 @@
 #include <iostream>
-#include "json_validator.h"
+#include "octo/octo.h"
 #include "websocket_client.h"
 
 using namespace Allxon;
@@ -19,11 +19,10 @@ int main(int argc, char **argv)
         return 1;
     }
     Util::plugin_install_dir = std::string(argv[1]);
-    auto np_update_json = Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_update_template.json");
-    auto json_validator = std::make_shared<JsonValidator>(PLUGIN_NAME, PLUGIN_APP_GUID,
-                                                          PLUGIN_ACCESS_KEY, PLUGIN_VERSION,
-                                                          np_update_json);
-    WebSocketClient web_client(json_validator);
-    web_client.RunSendingLoop();
+    WebSocketClient web_client(std::make_shared<Octo>(
+        PLUGIN_NAME, PLUGIN_APP_GUID,
+        PLUGIN_ACCESS_KEY, PLUGIN_VERSION,
+        Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_update_template.json")));
+    web_client.run();
     return 0;
 }

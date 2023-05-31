@@ -5,8 +5,7 @@
 #include <thread>
 #include <fstream>
 
-#include "cJSON.h"
-#include "json_validator.h"
+#include "octo/octo.h"
 
 #include "websocketpp/config/asio_client.hpp"
 #include "websocketpp/client.hpp"
@@ -40,24 +39,25 @@ public:
 class WebSocketClient
 {
 public:
-    WebSocketClient(std::shared_ptr<Allxon::JsonValidator> json_validator);
+    WebSocketClient(std::shared_ptr<Allxon::Octo> octo);
     ~WebSocketClient();
 
-    void RunSendingLoop();
+    void run();
 
 private:
-    context_ptr OnTLSInit(websocketpp::connection_hdl hdl);
-    void Connect(const std::string &url);
-    void OnOpen(websocketpp::connection_hdl hdl);
-    void OnClose(websocketpp::connection_hdl hdl);
-    void OnFail(websocketpp::connection_hdl hdl);
-    void OnMessage(websocketpp::connection_hdl hdl, client::message_ptr msg);
-    void SendNotifyPluginUpdate();
-    void SendPluginStatesMetrics();
-    void SendPluginCommandAck(std::queue<std::string> &queue);
-    void SendPluginAlert();
-    void PushCommandQueue(std::queue<std::string> &queue, std::string data);
-    bool PopCommandQueue(std::queue<std::string> &queue, std::string &pop_data);
+    context_ptr on_tls_init(websocketpp::connection_hdl hdl);
+    void connect(const std::string &url);
+    void on_open(websocketpp::connection_hdl hdl);
+    void on_close(websocketpp::connection_hdl hdl);
+    void on_fail(websocketpp::connection_hdl hdl);
+    void on_message(websocketpp::connection_hdl hdl, client::message_ptr msg);
+    void send_np_update();
+    void send_np_states_metrics();
+    void send_np_command_ack(std::queue<std::string> &queue);
+    void send_np_alert();
+    bool verify_and_send(const std::string &json);
+    void push_command_queue(std::queue<std::string> &queue, std::string data);
+    bool pop_command_queue(std::queue<std::string> &queue, std::string &pop_data);
 
     void set_alert_enabled(bool enabled);
     bool is_alert_enabled() const;
@@ -68,13 +68,13 @@ private:
     void set_alert_trigger(bool need_trigger);
     bool alert_trigger() const;
 
-    client m_endpoint;
-    websocketpp::connection_hdl m_hdl;
-    mutable std::mutex m_mutex;
-    websocketpp::lib::shared_ptr<std::thread> m_run_thread;
-    std::shared_ptr<Allxon::JsonValidator> m_json_validator;
-    std::queue<std::string> m_cmd_accept_queue;
-    std::queue<std::string> m_cmd_ack_queue;
+    client endpoint_;
+    websocketpp::connection_hdl hdl_;
+    mutable std::mutex mutex_;
+    websocketpp::lib::shared_ptr<std::thread> run_thread_;
+    std::shared_ptr<Allxon::Octo> octo_;
+    std::queue<std::string> cmd_accept_queue_;
+    std::queue<std::string> cmd_ack_queue_;
     std::string received_person_;
     bool alert_enabled_;
     bool alert_trigger_;

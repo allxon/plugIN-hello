@@ -79,7 +79,7 @@ else()
     message(CHECK_PASS "found")
 endif()
 
-set(OCTO_SDK_VERSION 3.1.0 CACHE STRING "octo sdk version")
+set(OCTO_SDK_VERSION 3.2.0 CACHE STRING "octo sdk version")
 
 message("=================== CMAKE_DIR : ${CMAKE_SOURCE_DIR} ======================")
 message("PLUGIN_NAME: ${PLUGIN_NAME}")
@@ -114,20 +114,6 @@ elseif(UNIX AND NOT APPLE)
 endif()
 
 include(FetchContent)
-
-### cJSON library
-FetchContent_Declare(
-    cjson
-    GIT_REPOSITORY https://github.com/DaveGamble/cJSON.git
-    GIT_TAG        v1.7.15
-)
-# we don't wanna 'subdirectory(cjson)', cuz we don't wanna trigger cjson project's install when call '--target package'
-FetchContent_GetProperties(cjson)
-if(NOT cjson_POPULATED)
-  FetchContent_Populate(cjson)
-endif()
-set(CJSON_SOURCE_FILE ${cjson_SOURCE_DIR}/cJSON.c)
-message("cjson library fetched")
 
 ### websocketpp library
 FetchContent_Declare(
@@ -194,12 +180,11 @@ list(APPEND LINK_LIBS ${OCTO_SDK_TARGET})
 ### build executable
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 aux_source_directory(${PROJECT_SOURCE_DIR}/src SOURCE_FILE)
-add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILE} ${CJSON_SOURCE_FILE})
+add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILE})
 
 list(APPEND EXTRA_INCLUDES ${octo_sdk_SOURCE_DIR}/include
                            ${asio_SOURCE_DIR}/asio/include
                            ${websocketpp_SOURCE_DIR}
-                           ${cjson_SOURCE_DIR}
     )
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${LINK_LIBS})
