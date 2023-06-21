@@ -187,7 +187,12 @@ list(APPEND EXTRA_INCLUDES ${octo_sdk_SOURCE_DIR}/include
                            ${websocketpp_SOURCE_DIR}
     )
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC stdc++fs ${LINK_LIBS})
+if (UNIX AND NOT APPLE)
+    list(APPEND LINK_LIBS stdc++fs)
+endif()
+
+target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${LINK_LIBS})
+
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC 
                             ${EXTRA_INCLUDES}
                             )
