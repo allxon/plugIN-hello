@@ -1,3 +1,4 @@
+#include <filesystem>
 #include "websocket_client.h"
 
 WebSocketClient::WebSocketClient(std::shared_ptr<Allxon::Octo> octo)
@@ -145,7 +146,7 @@ void WebSocketClient::send_np_update()
 {
     std::cout << "send_np_update" << std::endl;
     auto np_update = AJson::create(Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_update_template.json"));
-    np_update["params"]["modules"][0]["properties"][0]["value"].set_string(Util::plugin_install_dir.c_str());
+    np_update["params"]["modules"][0]["properties"][0]["value"].set_string(std::filesystem::canonical(Util::plugin_install_dir).string());
     verify_and_send(np_update.print(false));
 }
 
@@ -173,6 +174,7 @@ void WebSocketClient::send_np_alert()
     std::cout << "send_np_alert" << std::endl;
     auto np_alert = AJson::create(Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_alert.json"));
     np_alert["params"]["alarms"][0]["message"].set_string("Hello " + received_person() + " ~");
+    np_alert["params"]["alarms"][0]["time"].set_string(std::to_string(time(NULL)));
     verify_and_send(np_alert.print(false));
 }
 
