@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
-project(plugin-hello VERSION 1.0.1)
+project(plugin-hello VERSION 0.0.0)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -187,7 +187,12 @@ list(APPEND EXTRA_INCLUDES ${octo_sdk_SOURCE_DIR}/include
                            ${websocketpp_SOURCE_DIR}
     )
 
+if (UNIX AND NOT APPLE)
+    list(APPEND LINK_LIBS stdc++fs)
+endif()
+
 target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${LINK_LIBS})
+
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC 
                             ${EXTRA_INCLUDES}
                             )

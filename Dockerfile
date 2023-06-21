@@ -1,14 +1,16 @@
-FROM --platform=linux/amd64 ubuntu:20.04 AS install-dependency
+FROM ubuntu:18.04 AS install-dependency
 RUN apt-get update && apt-get install -y \
 	ca-certificates \
 	git \
 	wget \
-	g++ \
-	make \
+	build-essential \
+	g++-8 \
 	libssl-dev \
+    gdb \
 	&& rm -rf /var/lib/apt/lists/*
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.23.2/cmake-3.23.2-linux-x86_64.tar.gz
-RUN tar -xf cmake-3.23.2-linux-x86_64.tar.gz && cp -r cmake-3.23.2-linux-x86_64/* /usr
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 20 --slave /usr/bin/g++ g++ /usr/bin/g++-8
+COPY install_cmake.sh /
+RUN /bin/bash /install_cmake.sh 3.23.2
 
 FROM install-dependency AS build-stage
 ARG CMAKE_ARGS
