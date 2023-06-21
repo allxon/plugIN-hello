@@ -28,7 +28,7 @@ You need to acquire a _Plugin Credential_, which represents your plugin identity
 
 ## Docker build
 ```bash
-sudo docker build -f <Dockerfile.x86_64|Dockerfile.jetson> .
+sudo docker build .
 ```
 
 ## Install CMake
@@ -95,10 +95,10 @@ The file naming convention of a plugin package is `plugin-hello-[version]-linux-
 ### Linux
 ```bash
 # Deploy through docker, then you can get your plugin package under OUTPUT_DIRECTORY 
-sudo docker build -f <Dockerfile.jetson|Dockerfile.x86_64> -o <OUTPUT_DIRECTORY> . 
+sudo docker build -o <OUTPUT_DIRECTORY> . 
 
 # Specify octo sdk version
-sudo docker build -f <Dockerfile.jetson|Dockerfile.x86_64> -o <OUTPUT_DIRECTORY> --build-arg OCTO_SDK_VERSION=3.1.0 .
+sudo docker build -o <OUTPUT_DIRECTORY> --build-arg OCTO_SDK_VERSION=3.1.0 .
 ```
 ```bash
 # Deploy through cmake, then you can get your plugin package under build directory
