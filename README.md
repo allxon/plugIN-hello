@@ -139,37 +139,39 @@ powershell -command "Invoke-WebRequest -OutFile %temp%\plugin-installer.bat http
 ```
 
 # Getting Started
-Once configured, cmake creates `WORKSPACE/build/build_info.h`. You can use the following predefined marcos:
+Once configured, You can use the following predefined marcos:
 - `PLUGIN_NAME` 
 - `PLUGIN_APP_GUID`
 - `PLUGIN_ACCESS_KEY`
 - `PLUGIN_VERSION`
 
 ```cpp
-#include <string>
-#include "build_info.h"
-#include "json_validator.h"
+#include <iostream>
+#include "octo/octo.h"
+#include "websocket_client.h"
+
+using namespace Allxon;
+
+std::string Util::plugin_install_dir = "";
 
 int main(int argc, char **argv)
 {
-    // notifyPluginUpdate json template
-    std::string json_content = "{\"jsonrpc\": \"2.0\", \"method\": \"v2/notifyPluginUpdate\"...}"; 
-    auto json_validator = JsonValidator(PLUGIN_NAME, PLUGIN_APP_GUID,
-                                        PLUGIN_ACCESS_KEY, PLUGIN_VERSION,
-                                        json_content); 
-    
-    std::string other_plugin_api_json_content;
-    if (json_validator.Sign(other_plugin_api_json_content))
+    if (argc == 1)
     {
-        // if sign-in is successful, you can send it through websocket
-        // e.g. 
-        // enpoint.send(other_plugin_api_json_content);
+        std::cout << "Please provide a plugin install directory." << std::endl;
+        return 1;
     }
-
-    if (json_validator.Verify(other_plugin_api_json_content))
+    else if (argc > 2)
     {
-        // if verification is successful, it means json content is safe, and you can read it
+        std::cout << "Wrong arguments. Usage: device_plugin [plugin install directory]" << std::endl;
+        return 1;
     }
+    Util::plugin_install_dir = std::string(argv[1]);
+    WebSocketClient web_client(std::make_shared<Octo>(
+        PLUGIN_NAME, PLUGIN_APP_GUID,
+        PLUGIN_ACCESS_KEY, PLUGIN_VERSION,
+        Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_update_template.json")));
+    web_client.run();
     return 0;
 }
 ```
