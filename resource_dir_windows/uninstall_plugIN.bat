@@ -19,4 +19,6 @@ SET CURRENT_DIR=%~dp0
 schtasks /end /tn %APP_NAME%-service
 schtasks /delete /tn %APP_NAME%-service /f
 
+timeout /t 1
+
 goto 2>nul & rmdir "%ALLXON_PLUGIN_DIR%" /s /q
