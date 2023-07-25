@@ -59,7 +59,7 @@ Follow the installation instructions on the [OpenSSL official site](https://www.
 cmake -S . -B build -DCMAKE_BUILD_TYPE=<Debug|Release> -DPLUGIN_KEY=plugin_credential.json 
 
 # Specify octo sdk version
-cmake -S . -B build -DCMAKE_BUILD_TYPE=<Debug|Release> -DPLUGIN_KEY=plugin_credential.json -DOCTO_SDK_VERSION=3.1.0
+cmake -S . -B build -DCMAKE_BUILD_TYPE=<Debug|Release> -DPLUGIN_KEY=plugin_credential.json -DOCTO_SDK_VERSION=X.X.X
 
 # Build Stage
 cmake --build build
@@ -75,7 +75,7 @@ build/plugin-hello resource_dir_linux
 cmake -G "Visual Studio 16 2019" -A x64 -S . -B "build" -DPLUGIN_KEY=plugin_credential.json
 
 @REM Specify octo sdk version
-cmake -G "Visual Studio 16 2019" -A x64 -S . -B "build" -DOCTO_SDK_VERSION=3.1.0
+cmake -G "Visual Studio 16 2019" -A x64 -S . -B "build" -DOCTO_SDK_VERSION=X.X.X
 
 @REM Build Stage
 cmake --build build --config Release
@@ -98,7 +98,7 @@ The file naming convention of a plugin package is `plugin-hello-[version]-linux-
 sudo docker build -o <OUTPUT_DIRECTORY> . 
 
 # Specify octo sdk version
-sudo docker build -o <OUTPUT_DIRECTORY> --build-arg OCTO_SDK_VERSION=3.1.0 .
+sudo docker build -o <OUTPUT_DIRECTORY> --build-arg CMAKE_ARGS="-DOCTO_SDK_VERSION=X.X.X" .
 ```
 ```bash
 # Deploy through cmake, then you can get your plugin package under build directory
