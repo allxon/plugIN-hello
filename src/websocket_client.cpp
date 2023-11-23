@@ -134,12 +134,24 @@ void WebSocketClient::on_message(websocketpp::connection_hdl hdl, client::messag
     }
     else if (get_method == "v2/notifyPluginAlarmUpdate")
     {
+        // deprecated case
         if (!payload.item("params").has_object_item("modules"))
         {
             set_alert_enabled(false);
             return;
         }
-        set_alert_enabled(payload.item("params").item("modules").item(0).item("alarms").item(0).item("enabled").boolean());
+
+        auto alarms = payload.item("params").item("modules").item(0).item("alarms");
+        
+        // turn off all alerts
+        if (alarms.array_size() == 0)
+        {
+            set_alert_enabled(false);
+            return;
+        }
+
+        // turn on/off specific alert
+        set_alert_enabled(alarms.item(0).item("enabled").boolean());
     }
 }
 void WebSocketClient::send_np_update()
