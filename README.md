@@ -28,6 +28,8 @@ cd <EXTRACT_FOLDER_PATH>\<APP_GUID>
 plugin-hello.exe %cd%
 ```
 
+> **NOTE**: The plugin executable only tested on Ubuntu 18.04 and Windows 10. If you want to run the plugin on other platforms, please build from source.
+
 # Build from Source
 
 ## Obtain Plugin Credential
