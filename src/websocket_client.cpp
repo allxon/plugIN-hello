@@ -85,6 +85,7 @@ void WebSocketClient::on_fail(websocketpp::connection_hdl hdl)
 {
     std::cout << "on_fail" << std::endl;
     endpoint_.get_alog().write(websocketpp::log::alevel::app, "Connection Failed");
+    exit(1);
 }
 void WebSocketClient::on_message(websocketpp::connection_hdl hdl, client::message_ptr msg)
 {
