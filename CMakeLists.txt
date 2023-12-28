@@ -79,7 +79,7 @@ else()
     message(CHECK_PASS "found")
 endif()
 
-set(OCTO_SDK_VERSION 3.2.0 CACHE STRING "octo sdk version")
+set(OCTO_SDK_VERSION 3.3.1 CACHE STRING "octo sdk version")
 
 message("=================== CMAKE_DIR : ${CMAKE_SOURCE_DIR} ======================")
 message("PLUGIN_NAME: ${PLUGIN_NAME}")
