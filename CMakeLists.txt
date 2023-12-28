@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
-project(plugin-hello VERSION 0.0.0)
+project(plugin-hello VERSION 1.3.2)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
