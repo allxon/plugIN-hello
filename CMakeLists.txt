@@ -55,8 +55,8 @@ add_compile_definitions(
 # Check plugin package materials
 if(WIN32)
     set(PLUGIN_MATERIAL_DIR ${CMAKE_SOURCE_DIR}/resource_dir_windows)
-    set(INSTALL_SH_NAME "install_plugIN.bat")
-    set(UNINSTALL_SH_NAME "uninstall_plugIN.bat")
+    set(INSTALL_SH_NAME "install_plugIN.ps1")
+    set(UNINSTALL_SH_NAME "uninstall_plugIN.ps1")
 elseif(UNIX)
     set(PLUGIN_MATERIAL_DIR ${CMAKE_SOURCE_DIR}/resource_dir_linux)
     set(INSTALL_SH_NAME "install_plugIN.sh")

@@ -132,20 +132,20 @@ cmake --build build --target package
 cmake --build build --config <release|debug> --target package
 ```
 
-## Test Plugin Installation through Plugin Installer Script
+## Test Plugin Installation through allxon-cli
 
 After building the plugin package, use the following commands to install and test it on your device.
 
 ### Linux
 
 ```bash
-sudo bash -c "$(wget -qO - https://get.allxon.net/plugIN/linux)" -s --app-guid <APP_GUID> --from-path <PLUGIN_PACKAGE>
+sudo allxon-cli plugin --app-guid <APP_GUID> --package <PLUGIN_PACKAGE>
 ```
 
 ### Windows
 
-```batch
-powershell -command "Invoke-WebRequest -OutFile %temp%\plugin-installer.bat https://get.allxon.net/plugIN/windows" && %temp%\plugin-installer.bat --app-guid <APP_GUID> --from-path <PLUGIN_PACKAGE>
+```powershell
+allxon-cli.exe plugin --app-guid <APP_GUID> --package <PLUGIN_PACKAGE>
 ```
 
 Once installed, the plugin starts automatically.
@@ -155,13 +155,13 @@ If you want to uninstall the plugin, use the following commands:
 ### Linux
 
 ```bash
-sudo bash -c "$(wget -qO - https://get.allxon.net/plugIN/linux)" -s --app-guid <APP_GUID> --uninstall
+sudo allxon-cli plugin --app-guid <APP_GUID> --uninstall
 ```
 
 ### Windows
 
-```batch
-powershell -command "Invoke-WebRequest -OutFile %temp%\plugin-installer.bat https://get.allxon.net/plugIN/windows" && %temp%\plugin-installer.bat --app-guid <APP_GUID> --uninstall
+```powershell
+allxon-cli.exe plugin --app-guid <APP_GUID> --uninstall
 ```
 
 # Getting Started
