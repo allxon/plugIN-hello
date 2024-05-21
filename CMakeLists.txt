@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.23)
 project(plugin-hello VERSION 0.0.0)
 
+option(BUILD_FROM_SDK_SRC "Build octo-sdk from source" OFF)
+set (OCTO_SDK_VERSION 3.4.1 CACHE STRING "octo sdk version")
+
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -45,13 +48,6 @@ else()
     message(FATAL_ERROR "current os is not support")
 endif()
 
-add_compile_definitions(
-    PLUGIN_NAME="${PLUGIN_NAME}"
-    PLUGIN_VERSION="${PLUGIN_VERSION}"
-    PLUGIN_APP_GUID="${PLUGIN_APP_GUID}"
-    PLUGIN_ACCESS_KEY="${PLUGIN_ACCESS_KEY}"
-    )
-
 # Check plugin package materials
 if(WIN32)
     set(PLUGIN_MATERIAL_DIR ${CMAKE_SOURCE_DIR}/resource_dir_windows)
@@ -78,8 +74,6 @@ if(NOT EXISTS ${PLUGIN_MATERIAL_UNINSTALL_SH})
 else()
     message(CHECK_PASS "found")
 endif()
-
-set(OCTO_SDK_VERSION 3.3.1 CACHE STRING "octo sdk version")
 
 message("=================== CMAKE_DIR : ${CMAKE_SOURCE_DIR} ======================")
 message("PLUGIN_NAME: ${PLUGIN_NAME}")
@@ -118,30 +112,24 @@ include(FetchContent)
 ### websocketpp library
 FetchContent_Declare(
     websocketpp
-    GIT_REPOSITORY https://github.com/zaphoyd/websocketpp.git
-    GIT_TAG       0.8.2 
+    URL https://github.com/zaphoyd/websocketpp/archive/refs/tags/0.8.2.tar.gz
 )
 FetchContent_MakeAvailable(websocketpp)
-message("websocketpp library fetched")
+add_library(websocketpp INTERFACE)
+target_include_directories(websocketpp INTERFACE ${websocketpp_SOURCE_DIR})
+list(APPEND LINK_LIBS websocketpp)
+message(STATUS "websocketpp library fetched")
 
 ### ASIO library: set websocket to use C++ STL and non-Boost 
 FetchContent_Declare(
     asio
-    GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
-    GIT_TAG        asio-1-24-0
+    URL https://dev.allxon.net/source_code/asio-1.28.1.tar.gz
 )
 FetchContent_MakeAvailable(asio)
-if (MSVC)
-    add_definitions (-D_WEBSOCKETPP_CPP11_FUNCTIONAL_)
-    add_definitions (-D_WEBSOCKETPP_CPP11_SYSTEM_ERROR_)
-    add_definitions (-D_WEBSOCKETPP_CPP11_RANDOM_DEVICE_)
-    add_definitions (-D_WEBSOCKETPP_CPP11_MEMORY_)
-    add_definitions (-D_WEBSOCKETPP_CPP11_TYPE_TRAITS_)
-else()
-    add_definitions (-D_WEBSOCKETPP_CPP11_STL_)
-endif()
-add_definitions (-DASIO_STANDALONE)
-message("ASIO library fetched")
+add_library(asio INTERFACE)
+target_include_directories(asio INTERFACE ${asio_SOURCE_DIR}/include)
+list(APPEND LINK_LIBS asio)
+message(STATUS "ASIO library fetched")
 
 ### octo-sdk library
 if (BUILD_FROM_SDK_SRC)
@@ -178,24 +166,29 @@ endif()
 list(APPEND LINK_LIBS ${OCTO_SDK_TARGET})
 
 ### build executable
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
 aux_source_directory(${PROJECT_SOURCE_DIR}/src SOURCE_FILE)
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILE})
-
-list(APPEND EXTRA_INCLUDES ${octo_sdk_SOURCE_DIR}/include
-                           ${asio_SOURCE_DIR}/asio/include
-                           ${websocketpp_SOURCE_DIR}
-    )
+target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC
+    ASIO_STANDALONE
+    _WEBSOCKETPP_CPP11_STL_
+    PLUGIN_NAME="${PLUGIN_NAME}"
+    PLUGIN_VERSION="${PLUGIN_VERSION}"
+    PLUGIN_APP_GUID="${PLUGIN_APP_GUID}"
+    PLUGIN_ACCESS_KEY="${PLUGIN_ACCESS_KEY}"
+)
+if(WIN32 AND MSVC)
+    target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC UNICODE _UNICODE)
+endif()
 
 if (UNIX AND NOT APPLE)
     list(APPEND LINK_LIBS stdc++fs)
 endif()
-
 target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${LINK_LIBS})
 
-target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC 
-                            ${EXTRA_INCLUDES}
-                            )
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE 
+    ${PROJECT_SOURCE_DIR}/dep/openssl/include
+    ${octo_sdk_SOURCE_DIR}/include
+)
 
 # install stage
 install(DIRECTORY ${PLUGIN_MATERIAL_DIR}/ DESTINATION ./${PLUGIN_APP_GUID}

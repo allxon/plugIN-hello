@@ -1,16 +1,17 @@
-FROM ubuntu:18.04 AS install-dependency
-RUN apt-get update && apt-get install -y \
+FROM ubuntu:20.04 AS install-dependency
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y \
 	ca-certificates \
 	git \
 	wget \
 	build-essential \
-	g++-8 \
+	g++ \
 	libssl-dev \
     gdb \
 	&& rm -rf /var/lib/apt/lists/*
-RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 20 --slave /usr/bin/g++ g++ /usr/bin/g++-8
 COPY install_cmake.sh /
 RUN /bin/bash /install_cmake.sh 3.23.2
+COPY install_ninja.sh /
+RUN /bin/bash /install_ninja.sh v1.11.1
 
 FROM install-dependency AS build-stage
 ARG CMAKE_ARGS
