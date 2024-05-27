@@ -1,8 +1,6 @@
-throw "Error trying to do a task"
-
 $appName = "plugin-hello"
 $appGuid = ($env:ALLXON_PLUGIN_DIR).replace('C:\ProgramData\allxon\plugIN\', '')
-$currentDir = (Get-Location).Path
+$currentDir = $PSScriptRoot
 
 # Main Logic
 if (Test-Path $env:ALLXON_PLUGIN_DIR) {
