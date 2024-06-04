@@ -1,5 +1,8 @@
 #include <filesystem>
 #include "websocket_client.h"
+#include "nlohmann/json.hpp"
+
+namespace nl = nlohmann;
 
 WebSocketClient::WebSocketClient(std::shared_ptr<Allxon::Octo> octo)
     : octo_(octo), received_person_("nobody"), alert_enabled_(false), alert_trigger_(false)
@@ -89,22 +92,22 @@ void WebSocketClient::on_fail(websocketpp::connection_hdl hdl)
 }
 void WebSocketClient::on_message(websocketpp::connection_hdl hdl, client::message_ptr msg)
 {
-    const auto payload = AJson::create(msg->get_payload());
+    const auto payload = nl::json::parse(msg->get_payload());
     std::cout << "on_message" << std::endl;
-    std::cout << payload.print(false) << std::endl;
+    std::cout << payload.dump() << std::endl;
 
     // Handle JSON-RPC error object
-    if (payload.has_object_item("error"))
+    if (payload.contains("error"))
     {
-        auto error = payload.item("error");
+        auto error = payload.at("error");
         printf("Received JSON-RPC error object, error code: %s, error_message: %s\n",
-               error.item("code").string().c_str(), error.item("message").string().c_str());
+               error.at("code").template get<std::string>().c_str(), error.at("message").template get<std::string>().c_str());
         return;
     }
 
     // Verify payload
     std::string get_method;
-    if (!octo_->verify(payload.print(false), get_method))
+    if (!octo_->verify(payload.dump(), get_method))
     {
         std::cout << octo_->error_message() << std::endl;
         printf("Received data verify failed: %s\n", octo_->error_message().c_str());
@@ -114,61 +117,61 @@ void WebSocketClient::on_message(websocketpp::connection_hdl hdl, client::messag
     std::cout << "Get Method:" << get_method << std::endl;
     if (get_method == "v2/notifyPluginCommand")
     {
-        auto cmd_id = payload.item("params").item("commandId").string();
+        auto cmd_id = payload.at("params").at("commandId").template get<std::string>();
         std::cout << "get command id: " << cmd_id << std::endl;
-        set_received_person(payload.item("params").item("commands").item(0).item("params").item(0).item("value").string());
+        set_received_person(payload.at("params").at("commands").at(0).at("params").at(0).at("value").template get<std::string>());
 
-        auto cmd_accept = AJson::create(Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_command_ack.json"));
-        cmd_accept["params"]["commandId"].set_string(cmd_id);
-        cmd_accept["params"]["commandState"].set_string("ACCEPTED");
-        cmd_accept["params"]["commandAcks"][0]["result"].add_item_to_object("response", AJson(std::string("Hello " + received_person()).c_str()));
+        auto cmd_accept = nl::json::parse(Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_command_ack.json"));
+        cmd_accept["params"]["commandId"] = cmd_id;
+        cmd_accept["params"]["commandState"] = "ACCEPTED";
+        cmd_accept["params"]["commandAcks"][0]["result"]["response"] = "Hello " + received_person();
 
-        auto np_state = AJson::create(Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_state.json"));
-        np_state["params"]["states"][0]["value"].set_string(std::string("Hello " + received_person()).c_str());
-        cmd_accept["params"].add_item_to_object("states", np_state.item("params").item("states"));
+        auto np_state = nl::json::parse(Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_state.json"));
+        np_state["params"]["states"][0]["value"] = "Hello " + received_person();
+        cmd_accept["params"]["states"] = np_state.at("params").at("states");
 
-        push_command_queue(cmd_accept_queue_, cmd_accept.print(false));
+        push_command_queue(cmd_accept_queue_, cmd_accept.dump());
 
-        cmd_accept["params"]["commandState"].set_string("ACKED");
-        push_command_queue(cmd_ack_queue_, cmd_accept.print(false));
+        cmd_accept["params"]["commandState"] = "ACKED";
+        push_command_queue(cmd_ack_queue_, cmd_accept.dump());
         set_alert_trigger(true);
     }
     else if (get_method == "v2/notifyPluginAlarmUpdate")
     {
         // deprecated case
-        if (!payload.item("params").has_object_item("modules"))
+        if (!payload.at("params").contains("modules"))
         {
             set_alert_enabled(false);
             return;
         }
 
-        auto alarms = payload.item("params").item("modules").item(0).item("alarms");
+        auto alarms = payload.at("params").at("modules").at(0).at("alarms");
         
         // turn off all alerts
-        if (alarms.array_size() == 0)
+        if (alarms.size() == 0)
         {
             set_alert_enabled(false);
             return;
         }
 
         // turn on/off specific alert
-        set_alert_enabled(alarms.item(0).item("enabled").boolean());
+        set_alert_enabled(alarms.at(0).at("enabled").template get<bool>());
     }
 }
 void WebSocketClient::send_np_update()
 {
     std::cout << "send_np_update" << std::endl;
-    auto np_update = AJson::create(Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_update_template.json"));
-    np_update["params"]["modules"][0]["properties"][0]["value"].set_string(std::filesystem::canonical(Util::plugin_install_dir).string());
-    verify_and_send(np_update.print(false));
+    auto np_update = nl::json::parse(Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_update_template.json"));
+    np_update["params"]["modules"][0]["properties"][0]["value"] = std::filesystem::canonical(Util::plugin_install_dir).string();
+    verify_and_send(np_update.dump());
 }
 
 void WebSocketClient::send_np_states_metrics()
 {
     std::cout << "SendPluginStateMetrics" << std::endl;
-    auto np_state = AJson::create(Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_state.json"));
-    np_state["params"]["states"][0]["value"].set_string("Hello " + received_person());
-    verify_and_send(np_state.print(false));
+    auto np_state = nl::json::parse(Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_state.json"));
+    np_state["params"]["states"][0]["value"] = "Hello " + received_person();
+    verify_and_send(np_state.dump());
 }
 
 void WebSocketClient::send_np_command_ack(std::queue<std::string> &queue)
@@ -185,10 +188,10 @@ void WebSocketClient::send_np_command_ack(std::queue<std::string> &queue)
 void WebSocketClient::send_np_alert()
 {
     std::cout << "send_np_alert" << std::endl;
-    auto np_alert = AJson::create(Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_alert.json"));
-    np_alert["params"]["alarms"][0]["message"].set_string("Hello " + received_person() + " ~");
-    np_alert["params"]["alarms"][0]["time"].set_string(std::to_string(time(NULL)));
-    verify_and_send(np_alert.print(false));
+    auto np_alert = nl::json::parse(Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_alert.json"));
+    np_alert["params"]["alarms"][0]["message"] = "Hello " + received_person() + " ~";
+    np_alert["params"]["alarms"][0]["time"] = std::to_string(time(NULL));
+    verify_and_send(np_alert.dump());
 }
 
 bool WebSocketClient::verify_and_send(const std::string &json)

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.23)
 project(plugin-hello VERSION 0.0.0)
 
 option(BUILD_FROM_SDK_SRC "Build octo-sdk from source" OFF)
-set (OCTO_SDK_VERSION 3.4.1 CACHE STRING "octo sdk version")
+set (OCTO_SDK_VERSION 3.4.2 CACHE STRING "octo sdk version")
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -164,6 +164,19 @@ else()
     message("octo-sdk library (binary) fetched")
 endif()
 list(APPEND LINK_LIBS ${OCTO_SDK_TARGET})
+
+#nlohmann_json library
+message(STATUS "Fetching nlohmann_json library")
+FetchContent_Declare(
+    nl_json
+    URL https://github.com/nlohmann/json/archive/refs/tags/v3.11.3.tar.gz
+)
+FetchContent_MakeAvailable(nl_json)
+add_library(nl_json INTERFACE)
+# set_target_properties(nl_json PROPERTIES LINKER_LANGUAGE CXX)
+target_include_directories(nl_json INTERFACE ${nl_json_SOURCE_DIR}/single_include)
+list(APPEND LINK_LIBS nl_json)
+message(STATUS "nlohmann_json library fetched")
 
 ### build executable
 aux_source_directory(${PROJECT_SOURCE_DIR}/src SOURCE_FILE)

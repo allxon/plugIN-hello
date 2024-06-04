@@ -17,7 +17,7 @@ FROM install-dependency AS build-stage
 ARG CMAKE_ARGS
 COPY . /app
 WORKDIR /app
-RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=release -DPLUGIN_KEY=plugin_credential.json $CMAKE_ARGS
+RUN cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=release -DPLUGIN_KEY=plugin_credential.json $CMAKE_ARGS
 RUN cmake --build build --target package
 
 FROM scratch AS output-stage
