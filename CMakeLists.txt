@@ -162,21 +162,22 @@ else()
         set(OCTO_SDK_TARGET ${octo_sdk_SOURCE_DIR}/lib/libocto_sdk.a)
     endif()
     message("octo-sdk library (binary) fetched")
-endif()
-list(APPEND LINK_LIBS ${OCTO_SDK_TARGET})
 
-#nlohmann_json library
-message(STATUS "Fetching nlohmann_json library")
-FetchContent_Declare(
-    nl_json
-    URL https://github.com/nlohmann/json/archive/refs/tags/v3.11.3.tar.gz
-)
-FetchContent_MakeAvailable(nl_json)
-add_library(nl_json INTERFACE)
-# set_target_properties(nl_json PROPERTIES LINKER_LANGUAGE CXX)
-target_include_directories(nl_json INTERFACE ${nl_json_SOURCE_DIR}/single_include)
-list(APPEND LINK_LIBS nl_json)
-message(STATUS "nlohmann_json library fetched")
+    #nlohmann_json library
+    message(STATUS "Fetching nlohmann_json library")
+    FetchContent_Declare(
+        nl_json
+        URL https://github.com/nlohmann/json/archive/refs/tags/v3.11.3.tar.gz
+    )
+    FetchContent_MakeAvailable(nl_json)
+    add_library(nl_json INTERFACE)
+    # set_target_properties(nl_json PROPERTIES LINKER_LANGUAGE CXX)
+    target_include_directories(nl_json INTERFACE ${nl_json_SOURCE_DIR}/single_include)
+    list(APPEND LINK_LIBS nl_json)
+    message(STATUS "nlohmann_json library fetched")
+endif()
+
+list(APPEND LINK_LIBS ${OCTO_SDK_TARGET})
 
 ### build executable
 aux_source_directory(${PROJECT_SOURCE_DIR}/src SOURCE_FILE)
