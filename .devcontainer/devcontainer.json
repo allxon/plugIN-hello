@@ -10,9 +10,9 @@
 		"target": "install-dependency"
 	},
 	// Improve disk performance 
-	// "mounts": [
-	// 	"source=build,target=${containerWorkspaceFolder}/build,type=volume"
-	// ],
+	"mounts": [
+		"type=bind,source=/Users/${localEnv:USER}/.ssh,target=/root/.ssh,readonly"
+	],
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.

@@ -62,6 +62,7 @@ void WebSocketClient::run()
 }
 context_ptr WebSocketClient::on_tls_init(websocketpp::connection_hdl hdl)
 {
+    (void)hdl;
     std::cout << "on_tls_init" << std::endl;
     context_ptr ctx = websocketpp::lib::make_shared<asio::ssl::context>(asio::ssl::context::tlsv12);
 
@@ -76,22 +77,26 @@ context_ptr WebSocketClient::on_tls_init(websocketpp::connection_hdl hdl)
 
 void WebSocketClient::on_open(websocketpp::connection_hdl hdl)
 {
+    (void)hdl;
     std::cout << "on_open" << std::endl;
     send_np_update();
 }
 void WebSocketClient::on_close(websocketpp::connection_hdl hdl)
 {
+    (void)hdl;
     std::cout << "on_close" << std::endl;
     exit(0);
 }
 void WebSocketClient::on_fail(websocketpp::connection_hdl hdl)
 {
+    (void)hdl;
     std::cout << "on_fail" << std::endl;
     endpoint_.get_alog().write(websocketpp::log::alevel::app, "Connection Failed");
     exit(1);
 }
 void WebSocketClient::on_message(websocketpp::connection_hdl hdl, client::message_ptr msg)
 {
+    (void)hdl;
     const auto payload = nl::json::parse(msg->get_payload());
     std::cout << "on_message" << std::endl;
     std::cout << payload.dump() << std::endl;
