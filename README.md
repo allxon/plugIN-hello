@@ -114,10 +114,10 @@ The file naming convention of a plugin package is `plugin-hello-[version]-linux-
 
 ```bash
 # Deploy through docker, then you can get your plugin package under OUTPUT_DIRECTORY 
-sudo docker build -o <OUTPUT_DIRECTORY> . -f [Dockerfile.x86_64|Dockerfile.aarch64]
+sudo docker build -o <OUTPUT_DIRECTORY> .
 
 # Specify octo sdk version
-sudo docker build -o <OUTPUT_DIRECTORY> --build-arg CMAKE_ARGS="-DOCTO_SDK_VERSION=X.X.X" . -f [Dockerfile.x86_64|Dockerfile.aarch64]
+sudo docker build -o <OUTPUT_DIRECTORY> --build-arg CMAKE_ARGS="-DOCTO_SDK_VERSION=X.X.X" .
 ```
 
 ```bash
