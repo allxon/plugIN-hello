@@ -112,7 +112,7 @@ void WebSocketClient::on_message(websocketpp::connection_hdl hdl, client::messag
 
     // Verify payload
     std::string get_method;
-    if (!octo_->verify(payload.dump(), get_method))
+    if (!octo_->verify(msg->get_payload(), get_method))
     {
         std::cout << octo_->error_message() << std::endl;
         printf("Received data verify failed: %s\n", octo_->error_message().c_str());
