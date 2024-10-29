@@ -47,6 +47,12 @@
                 "defaultValue": "Buzz"
               }
             ]
+          },
+          {
+            "name": "restart",
+            "type": "asynchronous",
+            "displayCategory": "Action",
+            "displayName": "Restart"
           }
         ],
         "metrics": [],

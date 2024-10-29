@@ -140,6 +140,7 @@ void WebSocketClient::on_message(websocketpp::connection_hdl hdl, client::messag
                 verify_and_send(cmd_ack1.dump());
                 return;
             }
+        } else if (cmd_name == "restart") {
         } else {
             cmd_ack1["params"]["commandState"] = "REJECTED";
             verify_and_send(cmd_ack1.dump());
@@ -207,6 +208,14 @@ void WebSocketClient::run_command_and_ack(std::queue<std::string> &queue)
     if (cmd.at("name") == "say_hello") {
         set_received_person(cmd.at("params").at(0).at("value"));
         set_alert_trigger(true);
+    } else if (cmd.at("name") == "restart") {
+        if (!verify_and_send(cmd_ack2.dump())) {
+            std::cout << "verify_and_send failed" << std::endl;
+            return;
+        }
+        // Wait for agent-core to receive the response
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+        exit(0);
     } 
 
     if (!verify_and_send(cmd_ack2.dump())) {
