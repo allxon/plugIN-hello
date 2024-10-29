@@ -53,7 +53,7 @@ private:
     void on_message(websocketpp::connection_hdl hdl, client::message_ptr msg);
     void send_np_update();
     void send_np_states_metrics();
-    void send_np_command_ack(std::queue<std::string> &queue);
+    void run_command_and_ack(std::queue<std::string> &queue);
     void send_np_alert();
     bool verify_and_send(const std::string &json);
     void push_command_queue(std::queue<std::string> &queue, std::string data);
@@ -73,8 +73,7 @@ private:
     mutable std::mutex mutex_;
     websocketpp::lib::shared_ptr<std::thread> run_thread_;
     std::shared_ptr<Allxon::Octo> octo_;
-    std::queue<std::string> cmd_accept_queue_;
-    std::queue<std::string> cmd_ack_queue_;
+    std::queue<std::string> cmd_queue_;
     std::string received_person_;
     bool alert_enabled_;
     bool alert_trigger_;

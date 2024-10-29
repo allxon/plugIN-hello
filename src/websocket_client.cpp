@@ -45,8 +45,7 @@ void WebSocketClient::run()
     while (true)
     {
         std::this_thread::sleep_for(std::chrono::seconds(1));
-        send_np_command_ack(cmd_accept_queue_);
-        send_np_command_ack(cmd_ack_queue_);
+        run_command_and_ack(cmd_queue_);
         if (++count == 60)
         {
             send_np_states_metrics();
@@ -110,7 +109,7 @@ void WebSocketClient::on_message(websocketpp::connection_hdl hdl, client::messag
         return;
     }
 
-    // Verify payload
+    // Verify payload integrity
     std::string get_method;
     if (!octo_->verify(msg->get_payload(), get_method))
     {
@@ -124,22 +123,32 @@ void WebSocketClient::on_message(websocketpp::connection_hdl hdl, client::messag
     {
         auto cmd_id = payload.at("params").at("commandId").template get<std::string>();
         std::cout << "get command id: " << cmd_id << std::endl;
-        set_received_person(payload.at("params").at("commands").at(0).at("params").at(0).at("value").template get<std::string>());
 
-        auto cmd_accept = nl::json::parse(Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_command_ack.json"));
-        cmd_accept["params"]["commandId"] = cmd_id;
-        cmd_accept["params"]["commandState"] = "ACCEPTED";
-        cmd_accept["params"]["commandAcks"][0]["result"]["response"] = "Hello " + received_person();
+        // Prepare command response
+        auto cmd_ack1= nl::json::parse(Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_command_ack.json"));
+        cmd_ack1["params"]["commandId"] = cmd_id;
 
-        auto np_state = nl::json::parse(Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_state.json"));
-        np_state["params"]["states"][0]["value"] = "Hello " + received_person();
-        cmd_accept["params"]["states"] = np_state.at("params").at("states");
+        // Validate commands format
+        auto cmd = payload.at("params").at("commands").at(0);
+        std::string cmd_name = cmd.at("name");
+        cmd_ack1["params"]["commandAcks"][0]["name"] = cmd_name;
+        if (cmd_name == "say_hello") {
+            std::string param_name = cmd.at("params").at(0).at("name");
+            if (param_name != "person")
+            {
+                cmd_ack1["params"]["commandState"] = "REJECTED";
+                verify_and_send(cmd_ack1.dump());
+                return;
+            }
+        } else {
+            cmd_ack1["params"]["commandState"] = "REJECTED";
+            verify_and_send(cmd_ack1.dump());
+            return;
+        }
 
-        push_command_queue(cmd_accept_queue_, cmd_accept.dump());
-
-        cmd_accept["params"]["commandState"] = "ACKED";
-        push_command_queue(cmd_ack_queue_, cmd_accept.dump());
-        set_alert_trigger(true);
+        cmd_ack1["params"]["commandState"] = "ACCEPTED";
+        verify_and_send(cmd_ack1.dump());
+        push_command_queue(cmd_queue_, payload.dump());
     }
     else if (get_method == "v2/notifyPluginAlarmUpdate")
     {
@@ -179,14 +188,30 @@ void WebSocketClient::send_np_states_metrics()
     verify_and_send(np_state.dump());
 }
 
-void WebSocketClient::send_np_command_ack(std::queue<std::string> &queue)
+void WebSocketClient::run_command_and_ack(std::queue<std::string> &queue)
 {
-    if (queue.empty())
+    std::string cmd_payload;
+    if (!pop_command_queue(queue, cmd_payload))
         return;
-    std::cout << "send_np_command_ack" << std::endl;
-    std::string np_cmd_ack_str;
-    while (pop_command_queue(queue, np_cmd_ack_str) && verify_and_send(np_cmd_ack_str))
-    {
+
+    auto np_cmd = nl::json::parse(cmd_payload);
+    std::string cmd_id = np_cmd.at("params").at("commandId");
+    auto cmd = np_cmd.at("params").at("commands").at(0);
+
+    // Prepare command response
+    auto cmd_ack2= nl::json::parse(Util::getJsonFromFile(Util::plugin_install_dir + "/plugin_command_ack.json"));
+    cmd_ack2["params"]["commandId"] = cmd_id;
+    cmd_ack2["params"]["commandAcks"][0]["name"] = cmd.at("name");
+    cmd_ack2["params"]["commandState"] = "ACKED";
+
+    if (cmd.at("name") == "say_hello") {
+        set_received_person(cmd.at("params").at(0).at("value"));
+        set_alert_trigger(true);
+    } 
+
+    if (!verify_and_send(cmd_ack2.dump())) {
+        std::cout << "verify_and_send failed" << std::endl;
+        return;
     }
 }
 
