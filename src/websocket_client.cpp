@@ -63,7 +63,7 @@ context_ptr WebSocketClient::on_tls_init(websocketpp::connection_hdl hdl)
 {
     (void)hdl;
     std::cout << "on_tls_init" << std::endl;
-    context_ptr ctx = websocketpp::lib::make_shared<asio::ssl::context>(asio::ssl::context::tlsv12);
+    context_ptr ctx = websocketpp::lib::make_shared<asio::ssl::context>(asio::ssl::context::tls_client);
 
     ctx->set_options(asio::ssl::context::default_workarounds |
                      asio::ssl::context::no_sslv2 |
