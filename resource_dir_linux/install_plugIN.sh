@@ -27,8 +27,7 @@ check_for_install() {
         fi
 
         if [[ "$EXECUTABLE_DESCRIPTION" != *"$ARCH"* ]]; then
-            >&2 echo "Not Supported Architecture"
-            exit 1
+            >&2 echo "Warning: Host CPU architecture got from 'uname -i' is not same with installing package"
         fi
     fi
 }
