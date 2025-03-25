@@ -139,13 +139,13 @@ After building the plugin package, use the following commands to install and tes
 ### Linux
 
 ```bash
-sudo allxon-cli plugin --app-guid <APP_GUID> --package <PLUGIN_PACKAGE>
+sudo allxon-cli plugin --app-guid <APP_GUID> install --package <PLUGIN_PACKAGE>
 ```
 
 ### Windows
 
 ```powershell
-allxon-cli.exe plugin --app-guid <APP_GUID> --package <PLUGIN_PACKAGE>
+allxon-cli.exe plugin --app-guid <APP_GUID> install --package <PLUGIN_PACKAGE>
 ```
 
 Once installed, the plugin starts automatically.
@@ -155,13 +155,13 @@ If you want to uninstall the plugin, use the following commands:
 ### Linux
 
 ```bash
-sudo allxon-cli plugin --app-guid <APP_GUID> --uninstall
+sudo allxon-cli plugin --app-guid <APP_GUID> uninstall
 ```
 
 ### Windows
 
 ```powershell
-allxon-cli.exe plugin --app-guid <APP_GUID> --uninstall
+allxon-cli.exe plugin --app-guid <APP_GUID> uninstall
 ```
 
 # Getting Started
