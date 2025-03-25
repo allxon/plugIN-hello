@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
-project(plugin-hello VERSION 0.0.0)
+project(plugin-hello VERSION 1.3.3)
 
 option(BUILD_FROM_SDK_SRC "Build octo-sdk from source" OFF)
 set (OCTO_SDK_VERSION 3.4.2 CACHE STRING "octo sdk version")
