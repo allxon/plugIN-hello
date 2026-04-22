@@ -35,6 +35,7 @@ plugin-hello.exe %cd%
 ## Obtain Plugin Credential
 
 You need to acquire a _Plugin Credential_, which represents your plugin identity. To do so, contact us to obtain `plugin_credential.json`, which includes a set of `APP_GUID` and `ACCESS_KEY`.
+
 > **WARNING**: Each `plugin_credential.json` is paired with one plugin program. Different platforms or CPU architectures require different plugin credentials. Make sure you use the suitable `plugin_credential.json`.
 
 ## Docker build
@@ -72,7 +73,7 @@ Follow the installation instructions on the [OpenSSL official site](https://www.
 
 ```bash
 # Configuration Stage
-cmake -S . -B build -DCMAKE_BUILD_TYPE=<Debug|Release> -DPLUGIN_KEY=plugin_credential.json 
+cmake -S . -B build -DCMAKE_BUILD_TYPE=<Debug|Release> -DPLUGIN_KEY=plugin_credential.json
 
 # Specify octo sdk version
 cmake -S . -B build -DCMAKE_BUILD_TYPE=<Debug|Release> -DPLUGIN_KEY=plugin_credential.json -DOCTO_SDK_VERSION=X.X.X
@@ -106,14 +107,14 @@ build\Release\plugin-hello.exe resource_dir_windows
 
 A _Plugin Package_ is an archived plugin which is workable with Allxon Plugin Center. (Contact us for detailed listing process)
 
-The file naming convention of a plugin package is `plugin-hello-[version]-linux-[arch].tar.gz` (Linux) or `plugin-hello-[version]-win-[arch].zip` (Windows).
+The file naming convention of a plugin package is `plugin-hello-[version]-linux-[arch].tar.gz` on Linux. Windows packages use `plugin-hello-[version]-win-[arch].zip`.
+
+> for Windows build, packaging, and distribution support, please [contact Allxon](https://www.allxon.com/contact).
 
 ## Deploy Plugin Package
 
-### Linux
-
 ```bash
-# Deploy through docker, then you can get your plugin package under OUTPUT_DIRECTORY 
+# Deploy through docker, then you can get your plugin package under OUTPUT_DIRECTORY
 sudo docker build -o <OUTPUT_DIRECTORY> .
 
 # Specify octo sdk version
@@ -125,43 +126,20 @@ sudo docker build -o <OUTPUT_DIRECTORY> --build-arg CMAKE_ARGS="-DOCTO_SDK_VERSI
 cmake --build build --target package
 ```
 
-### Windows
-
-```bash
-# Deploy through cmake, then you can get your plugin package under build directory
-cmake --build build --config <release|debug> --target package
-```
-
 ## Test Plugin Installation through allxon-cli
 
 After building the plugin package, use the following commands to install and test it on your device.
 
-### Linux
-
 ```bash
 sudo allxon-cli plugin --app-guid <APP_GUID> install --package <PLUGIN_PACKAGE>
-```
-
-### Windows
-
-```powershell
-allxon-cli.exe plugin --app-guid <APP_GUID> install --package <PLUGIN_PACKAGE>
 ```
 
 Once installed, the plugin starts automatically.
 
 If you want to uninstall the plugin, use the following commands:
 
-### Linux
-
 ```bash
 sudo allxon-cli plugin --app-guid <APP_GUID> uninstall
-```
-
-### Windows
-
-```powershell
-allxon-cli.exe plugin --app-guid <APP_GUID> uninstall
 ```
 
 # Getting Started
